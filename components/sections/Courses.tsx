@@ -1,8 +1,6 @@
-import { classShifts, courseIntro, courseSlogan, extraCourse, mainCourses } from '@/data/courses'
+import { classShifts, courseIntro, courseSlogan, mainCourses } from '@/data/courses'
 import { formatVnd, nb } from '@/lib/format'
-import { zaloHref } from '@/lib/links'
 import { Container, Section, SectionHeading } from '@/components/ui/Section'
-import { buttonClass } from '@/components/ui/ButtonLink'
 import Image from 'next/image'
 import TiltedCard from '@/components/ui/TiltedCard'
 import { CourseRegisterButton } from './CourseRegisterButton'
@@ -56,9 +54,8 @@ export function Courses() {
                   backContent={
                     /* Mặt sau: chi tiết khóa (gọn — theo yêu cầu bỏ cấp độ, dòng "tiết kiệm", ô quà tặng) */
                     <div
-                      className={`flex h-full flex-col rounded-card px-6 py-6 lg:px-7 ${
-                        featured ? 'border-[1.5px] border-accent bg-ink text-cream' : 'border border-line bg-cream text-ink'
-                      }`}
+                      className={`flex h-full flex-col rounded-card px-6 py-6 lg:px-7 ${featured ? 'border-[1.5px] border-accent bg-ink text-cream' : 'border border-line bg-cream text-ink'
+                        }`}
                     >
                       {featured ? (
                         <p className="mb-2 pr-10 text-[12px] font-medium uppercase tracking-[0.18em] text-accent">Lộ trình đầy đủ nhất</p>
@@ -119,29 +116,6 @@ export function Courses() {
             )
           })}
         </div>
-
-        {/* Khóa bổ trợ */}
-        <div
-          data-reveal="up"
-          className="mt-12 grid items-center gap-6 rounded-card border border-line bg-cream px-7 py-7 md:grid-cols-[auto_1fr_auto] md:gap-10 lg:mt-16 lg:px-10"
-        >
-          <div>
-            <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-accent-deep">Khóa bổ trợ</p>
-            <h3 className="mt-1 font-serif text-[26px] font-medium leading-tight text-ink">{nb(extraCourse.name)}</h3>
-          </div>
-          <p className="text-[15px] leading-[1.7] text-ink-soft">{nb(extraCourse.summary)}</p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center md:flex-col md:items-end lg:flex-row lg:items-center">
-            <p className="font-serif text-[32px] leading-none text-ink">{formatVnd(extraCourse.price)}</p>
-            <CourseRegisterButton courseId={extraCourse.id} courseName={extraCourse.name} variant="solid" compact />
-          </div>
-        </div>
-
-        <p data-reveal="up" className="mt-10 text-center text-[14px] text-ink-soft">
-          {nb('Chưa chắc khóa nào hợp với mình?')}{' '}
-          <a href={zaloHref} target="_blank" rel="noopener noreferrer" className={buttonClass('ghost')}>
-            {nb('Nhắn Zalo để Eva tư vấn lộ trình')}
-          </a>
-        </p>
       </Container>
     </Section>
   )

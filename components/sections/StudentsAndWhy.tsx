@@ -1,5 +1,4 @@
 import { Container, Section, SectionHeading } from '@/components/ui/Section'
-import { buttonClass } from '@/components/ui/ButtonLink'
 import { StudentWorksCarousel } from './StudentWorksCarousel'
 import { WhyStory } from './WhyStory'
 
@@ -16,9 +15,6 @@ export function StudentsAndWhy() {
               description="Nơi lưu lại bài thực hành của học viên Eva qua từng khóa học. Ảnh thật đang được tiệm cập nhật."
               className="lg:mb-14"
             />
-            <a href="#khoa-hoc" className={`${buttonClass('outline')} mb-12 hidden self-start lg:mb-14 lg:inline-flex lg:self-end`}>
-              Xem các khóa học
-            </a>
           </div>
           <StudentWorksCarousel />
         </Container>

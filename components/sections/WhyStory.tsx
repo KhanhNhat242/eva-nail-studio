@@ -90,7 +90,8 @@ export function WhyStory() {
       <div className="sticky top-16 flex h-[calc(100svh-64px)] items-center overflow-hidden lg:top-[76px] lg:h-[calc(100svh-76px)]">
         <div className="mx-auto grid h-full w-full max-w-[1240px] grid-rows-[auto_1fr] gap-6 px-5 pb-[76px] pt-8 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:grid-rows-1 lg:items-center lg:gap-14 lg:px-10 lg:py-14">
           {/* Trái: chữ đổi theo mục đang hiện */}
-          <div className="flex flex-col lg:h-full lg:justify-between lg:py-4">
+          {/* Tiêu đề + mô tả + nút đi liền một khối, căn giữa theo chiều dọc (không đẩy về 2 đầu) */}
+          <div className="flex flex-col lg:justify-center">
             <div>
               <h2 id="vi-sao-title" className="text-[12px] font-medium uppercase tracking-[0.22em] text-accent">
                 {nb('Vì sao chọn Eva')} · {String(active + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
@@ -104,7 +105,7 @@ export function WhyStory() {
               </p>
             </div>
 
-            <div className="mt-4 lg:mt-0">
+            <div className="mt-4 lg:mt-8">
               <p key={`d-${u.id}`} className="lightbox-fade max-w-[340px] text-[14px] leading-[1.65] text-cream/80 lg:text-[15px]">
                 {nb(u.description)}
               </p>
@@ -118,10 +119,13 @@ export function WhyStory() {
           </div>
 
           {/* Phải: carousel ảnh + thanh tiến độ */}
-          <div className="flex min-h-0 flex-col lg:h-full">
-            <div className="relative min-h-[220px] flex-1">
+          <div className="flex min-h-0 flex-col lg:justify-center">
+            {/* Desktop: khung tỉ lệ 16:10 (ảnh chính ~4:5) thay vì cao cả màn hình */}
+            <div className="relative min-h-[220px] flex-1 lg:aspect-[16/10] lg:max-h-[min(560px,calc(100svh-220px))] lg:flex-none">
               {usps.map((it, i) => {
-                const k = i - active
+                // Mục cuối: các mục đầu quay vòng vào hàng chờ để bên phải không bị trống
+                const d = i - active
+                const k = d < 0 && d + n <= 3 ? d + n : d
                 return (
                   <button
                     key={it.id}

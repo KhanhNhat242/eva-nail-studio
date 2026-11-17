@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type MouseEvent } from 'react'
 import { navItems, business } from '@/data/business'
 import { buttonClass } from '@/components/ui/ButtonLink'
 import { CloseIcon, MenuIcon, PhoneIcon } from '@/components/ui/Icons'
@@ -10,7 +10,7 @@ import { Logo } from './Logo'
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
-  // Đang trong vùng Hero → menu dồn phải, ẩn nút "Đặt lịch"; qua khỏi Hero → menu về giữa, hiện nút.
+  // Đang trong vùng Hero → ẩn nút "Đặt lịch", menu có nền kem; qua khỏi Hero → hiện nút. Menu luôn ở giữa.
   const [inHero, setInHero] = useState(true)
 
   useEffect(() => {
@@ -33,19 +33,46 @@ export function Header() {
     return () => io.disconnect()
   }, [])
 
+  // Menu mobile mở → khóa cuộn trang (cố định body tại vị trí hiện tại — chạy được cả Safari iOS),
+  // đóng → trả lại đúng vị trí cũ.
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (!open) return
+    const y = window.scrollY
+    const body = document.body
+    const html = document.documentElement
+    const prev = { position: body.style.position, top: body.style.top, width: body.style.width, overflow: html.style.overflow, behavior: html.style.scrollBehavior }
+    html.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.top = `-${y}px`
+    body.style.width = '100%'
     return () => {
-      document.body.style.overflow = ''
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.width = prev.width
+      html.style.overflow = prev.overflow
+      html.style.scrollBehavior = 'auto' // trả vị trí tức thì, không trượt
+      window.scrollTo(0, y)
+      html.style.scrollBehavior = prev.behavior
     }
   }, [open])
 
+  // Trong menu mobile: đóng menu (mở khóa cuộn) trước, rồi mới cuộn tới section
+  const goFromMenu = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    setOpen(false)
+    window.setTimeout(() => {
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      history.replaceState(null, '', href)
+    }, 60)
+  }
+
   return (
     <header
-      // Trong Hero: trong suốt, nằm đè lên nền blush của Hero. Ra khỏi Hero (hoặc mở menu mobile): nền kem + viền mảnh.
+      // Trong Hero: trong suốt, nằm đè lên Hero (lớp chuyển màu linen của Hero làm nền). Ra khỏi Hero (hoặc mở menu mobile): nền kem + viền mảnh.
+      // Menu mobile mở → header phủ kín màn hình (100dvh), danh sách menu lấp phần còn lại
       className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-500 ease-[var(--ease-soft)] ${
         inHero && !open ? 'border-transparent bg-transparent' : `bg-cream ${scrolled ? 'border-line' : 'border-transparent'}`
-      }`}
+      } ${open ? 'flex h-dvh flex-col lg:block lg:h-auto' : ''}`}
     >
       <div className="relative mx-auto flex h-16 w-full max-w-[1240px] items-center justify-between gap-6 px-5 sm:px-8 lg:h-[76px] lg:px-10">
         <a href="#top" aria-label={`${business.name} – về đầu trang`} className="relative z-10 shrink-0">
@@ -53,14 +80,14 @@ export function Header() {
         </a>
 
         {/*
-          Lớp định vị menu = đúng vùng nội dung (trừ padding). Trượt giữa 2 trạng thái bằng left + translateX:
-          trong Hero: left 100% / -100% (sát phải) · ngoài Hero: left 50% / -50% (giữa).
+          Lớp định vị menu = đúng vùng nội dung (trừ padding). Menu luôn căn giữa (người dùng yêu cầu 17/11/2026).
+          Trong Hero: nền kem đặc để chữ không chìm vào ảnh; ngoài Hero: trong suốt trên header kem.
         */}
         <div className="pointer-events-none absolute inset-y-0 left-5 right-5 hidden sm:left-8 sm:right-8 lg:left-10 lg:right-10 lg:block">
           <nav
             aria-label="Điều hướng chính"
-            className="pointer-events-auto absolute top-1/2 w-max whitespace-nowrap transition-[left,transform] duration-700 ease-[var(--ease-lux)] motion-reduce:transition-none"
-            style={{ left: inHero ? '100%' : '50%', transform: `translate(${inHero ? '-100%' : '-50%'}, -50%)` }}
+            className="pointer-events-auto absolute top-1/2 w-max whitespace-nowrap"
+            style={{ left: '50%', transform: 'translate(-50%, -50%)' }}
           >
             {/* Trong Hero: nền kem đặc + viền mảnh để chữ không chìm vào ảnh phía sau; ngoài Hero: trong suốt */}
             <ul
@@ -109,15 +136,16 @@ export function Header() {
       {/* Menu mobile */}
       <div
         id="mobile-menu"
-        className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-[var(--ease-soft)] lg:hidden ${open ? 'max-h-[100svh] opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`min-h-0 overflow-hidden transition-[opacity] duration-300 ease-[var(--ease-soft)] lg:hidden ${open ? 'flex-1 opacity-100' : 'h-0 opacity-0'}`}
       >
-        <nav aria-label="Menu di động" className="h-[calc(100svh-64px)] overflow-y-auto border-t border-line px-5 pb-28 pt-6 sm:px-8">
+        {/* Cao bằng phần còn lại của màn hình; nội dung dài hơn thì cuộn bên trong menu (trang phía sau đã khóa) */}
+        <nav aria-label="Menu di động" className="h-full overflow-y-auto overscroll-contain border-t border-line px-5 pb-10 pt-6 sm:px-8">
           <ul className="flex flex-col">
             {navItems.map((item) => (
               <li key={item.href} className="border-b border-line">
                 <a
                   href={item.href}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => goFromMenu(e, item.href)}
                   className="flex items-center justify-between py-5 font-serif text-[28px] leading-none text-ink"
                 >
                   <span>{item.label}</span>
@@ -126,7 +154,7 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-8 flex flex-col gap-3">
-            <a href="#dat-lich" onClick={() => setOpen(false)} className={buttonClass('solid')}>
+            <a href="#dat-lich" onClick={(e) => goFromMenu(e, '#dat-lich')} className={buttonClass('solid')}>
               Đặt lịch làm đẹp
             </a>
             <a href={telHref} className={buttonClass('outline')}>

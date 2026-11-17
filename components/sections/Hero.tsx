@@ -1,8 +1,27 @@
 import Image from 'next/image'
 import { nb } from '@/lib/format'
 import { ArrowIcon, buttonClass } from '@/components/ui/ButtonLink'
-import { LashIcon, PolishIcon } from '@/components/ui/Icons'
 import { Star } from '@/components/ui/Star'
+import FoldText, { type FoldTextProps } from '@/components/ui/FoldText'
+
+/** Cấu hình FoldText theo người dùng gửi (17/11/2026) — trừ fontSize/fontWeight: kế thừa kiểu chữ hero */
+const foldConfig: FoldTextProps = {
+  foldStyle: 'paper',
+  splitBy: 'char',
+  hinge: 'top',
+  trigger: 'scroll',
+  foldAngle: 92,
+  duration: 0.65,
+  stagger: 0.045,
+  staggerFrom: 'start',
+  ease: 'power3.out',
+  loopDelay: 1.4,
+  hoverRefold: true,
+  refoldRadius: 140,
+  refoldAngle: 45,
+  perspective: 700,
+  creaseShading: 0.55,
+}
 
 /**
  * Ảnh lưới quanh mảng giấy — lấy ngẫu nhiên trong /public/images (người dùng yêu cầu), ưu tiên tông nude
@@ -54,14 +73,18 @@ export function Hero() {
     <section
       id="top"
       aria-labelledby="hero-title"
-      className="relative flex min-h-[calc(100svh-64px)] flex-col overflow-hidden bg-linen pt-16 lg:block lg:h-svh lg:min-h-[680px] lg:pt-[76px]"
+      // Desktop: cao bằng màn hình nhưng tối đa 960px — màn lớn (2K/4K) không bị kéo cao theo
+      className="relative flex min-h-[calc(100svh-64px)] flex-col overflow-hidden bg-linen pt-16 lg:block lg:h-[min(100svh,960px)] lg:min-h-[680px] lg:pt-0"
     >
-      {/* Lưới ảnh — desktop 4×2 */}
-      <div className="absolute inset-x-0 bottom-0 top-[76px] hidden grid-cols-[1fr_1.15fr_1.15fr_1fr] grid-rows-2 gap-2 p-2 lg:grid">
+      {/* Lưới ảnh — desktop 4×2, chạy phía sau header; rộng tối đa 1720px, căn giữa trên màn rất rộng */}
+      <div className="absolute inset-y-0 left-1/2 hidden w-full max-w-[1720px] -translate-x-1/2 grid-cols-[1fr_1.15fr_1.15fr_1fr] grid-rows-2 gap-2 p-2 lg:grid">
         {collage.map((_, i) => (
           <Photo key={i} i={i} priority={i < 4} />
         ))}
       </div>
+
+      {/* Nền header hòa vào Hero: linen ở mép trên mờ dần xuống ảnh (logo + menu luôn rõ) */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[5] hidden h-44 bg-gradient-to-b from-linen via-linen/75 to-transparent lg:block" />
 
       {/* Mobile: 2 ảnh trên */}
       <div className="grid h-[22svh] min-h-[130px] grid-cols-2 gap-1.5 px-1.5 pt-1.5 lg:hidden">
@@ -70,7 +93,7 @@ export function Hero() {
       </div>
 
       {/* Mảng giấy xé ở giữa */}
-      <div className="relative z-10 -my-6 flex flex-1 items-center justify-center px-3 lg:absolute lg:inset-x-0 lg:bottom-0 lg:top-[76px] lg:my-0 lg:px-0">
+      <div className="relative z-10 -my-6 flex flex-1 items-center justify-center px-3 lg:absolute lg:inset-0 lg:my-0 lg:px-0 lg:pt-10">
         <div className="hero-rise relative w-full max-w-[560px] lg:w-[46%] lg:max-w-[640px]" style={{ ['--d' as string]: '200ms' }}>
           {/* vệt màu loang phía sau — lớp ngoài làm mờ, lớp trong cắt hình (blur trên cùng phần tử clip-path không mềm mép) */}
           <span aria-hidden className="absolute -inset-x-[6%] -inset-y-[8%] opacity-85" style={{ filter: 'blur(6px)' }}>
@@ -79,12 +102,16 @@ export function Hero() {
           {/* giấy */}
           <div className="paper-grain relative bg-cream px-6 py-9 text-center shadow-[0_30px_60px_-36px_rgba(20,20,20,0.45)] sm:px-10 lg:px-14 lg:py-14" style={{ clipPath: TORN }}>
             <Star className="mx-auto size-5 text-accent-deep lg:size-6" />
+            {/*
+              FoldText (React Bits) — từng ký tự gập giấy từ mép trên rồi mở ra; rê chuột gần → gập nhẹ lại.
+              Cấu hình theo người dùng gửi; cỡ chữ & độ đậm kế thừa kiểu chữ hero (Cormorant không có weight 800).
+            */}
             <h1 id="hero-title" className="mt-3 lg:mt-4">
               <span className="block pl-[0.18em] font-serif text-[clamp(56px,16vw,80px)] font-medium uppercase leading-[0.9] tracking-[0.18em] text-ink lg:text-[clamp(80px,7.4vw,128px)]">
-                Eva
+                <FoldText {...foldConfig} text="Eva" tracking="0.18em" leading="0.9" />
               </span>
               <span className="-mt-[0.1em] block font-serif text-[clamp(30px,8.6vw,42px)] font-normal italic leading-none text-accent-deep lg:text-[clamp(42px,3.8vw,62px)]">
-                Nail Studio
+                <FoldText {...foldConfig} text="Nail Studio" tracking="0" leading="1" />
               </span>
             </h1>
 
@@ -97,11 +124,6 @@ export function Hero() {
             <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-soft sm:text-[12px] lg:mt-4 lg:text-[13px]">
               {nb('Nail art · Hair wash · Lashes')}
             </p>
-
-            <div className="mt-3 flex items-center justify-center gap-3 text-accent-deep lg:mt-4" aria-hidden>
-              <PolishIcon className="size-5 lg:size-6" />
-              <LashIcon className="size-5 lg:size-6" />
-            </div>
 
             <div className="mx-auto mt-5 flex w-full max-w-[420px] gap-2.5 lg:mt-8">
               <a href="#dat-lich" className={buttonClass('solid', 'hero')}>

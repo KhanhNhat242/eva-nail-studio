@@ -14,7 +14,7 @@ type ShowcaseItem = {
   priceLabel: string
   cta: { label: string; href: string }
   image?: { src: string; alt: string }
-  /** Thẻ nền đen (khóa học) thay cho ảnh */
+  /** Chữ đè lên ảnh (thẻ khóa học) — có lớp tối dần ở đáy để chữ kem đủ tương phản */
   dark?: { kicker: string; heading: string }
 }
 
@@ -39,6 +39,8 @@ const items: ShowcaseItem[] = [
     description: courseIntro,
     priceLabel: `Học phí từ ${formatVnd(minCourse)}`,
     cta: { label: 'Xem khóa học', href: '#khoa-hoc' },
+    // Ảnh minh họa (người dùng yêu cầu 17/11/2026, thay nền đen): mẫu tráng gương chụp trong salon
+    image: { src: '/images/nails/trang-guong-chrome.jpg', alt: 'Bộ móng tráng gương chrome thực hiện tại salon Eva' },
     dark: { kicker: 'Khóa học tại Eva', heading: 'Học nghề ngay tại salon đang vận hành' },
   },
   fromService(svc.goi),
@@ -125,8 +127,9 @@ export function ServicesShowcase() {
                   >
                     {it.image ? (
                       <Image src={it.image.src} alt="" fill sizes="(min-width: 1024px) 560px, 92vw" className="object-cover" />
-                    ) : it.dark ? (
-                      <div className="flex h-full flex-col justify-end bg-ink p-7 text-cream lg:p-10">
+                    ) : null}
+                    {it.dark ? (
+                      <div className={`absolute inset-0 flex flex-col justify-end p-7 text-cream lg:p-10 ${it.image ? 'bg-gradient-to-t from-ink/90 via-ink/45 to-transparent' : 'bg-ink'}`}>
                         <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-accent">{it.dark.kicker}</p>
                         <p className="mt-3 max-w-[420px] font-serif text-[30px] font-medium leading-[1.05] tracking-[-0.02em] lg:text-[44px]">
                           {nb(it.dark.heading)}
