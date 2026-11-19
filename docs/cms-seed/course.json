@@ -1,0 +1,66 @@
+[
+  {
+    "id": "co-ban-salon",
+    "name": "Cơ bản Salon",
+    "price": 8000000,
+    "original_price": null,
+    "description": "Bước đầu vào nghề nail cho người mới, học thực tế theo giáo trình rõ ràng và dễ áp dụng.",
+    "commit": [
+      "Giáo trình rõ ràng, dễ hiểu",
+      "Thực hành trên mẫu thật",
+      "Học theo lộ trình cá nhân"
+    ],
+    "gift": null,
+    "featured": false,
+    "img": "/images/nails/trang-guong-chrome.jpg",
+    "img_placeholder": true
+  },
+  {
+    "id": "full-salon",
+    "name": "Full Salon",
+    "price": 12000000,
+    "original_price": 12900000,
+    "description": "Trang bị kỹ năng làm việc trong môi trường salon chuyên nghiệp, sẵn sàng đi làm sau khóa học.",
+    "commit": [
+      "Kỹ năng sát thực tế salon",
+      "Lên mẫu thực tế từng bước",
+      "Tư vấn đồ nghề sau khóa"
+    ],
+    "gift": null,
+    "featured": false,
+    "img": "/images/nails/ombre-xanh-bien.jpg",
+    "img_placeholder": true
+  },
+  {
+    "id": "full-a-z",
+    "name": "Full A–Z chuyên nghiệp",
+    "price": 16000000,
+    "original_price": 16900000,
+    "description": "Lộ trình trọn vẹn từ cơ bản đến nâng cao, kèm hỗ trợ set up mở tiệm chuẩn salon sau khóa.",
+    "commit": [
+      "Cơ bản – nâng cao – chuyên nghiệp",
+      "Kèm cốp đồ cơ bản (không gồm máy mài)",
+      "Định hướng việc làm sau học"
+    ],
+    "gift": "Tặng bộ đầu mài WILSON cao cấp",
+    "featured": true,
+    "img": "/images/nails/hero-hoa-noi-hong.jpg",
+    "img_placeholder": true
+  },
+  {
+    "id": "goi-duong-sinh",
+    "name": "Gội dưỡng sinh 2 tuần",
+    "price": 6000000,
+    "original_price": null,
+    "description": "Massage, bấm huyệt dưỡng sinh và thực hành trên mẫu thật mỗi buổi, cấp chứng chỉ sau khi hoàn thành.",
+    "commit": [
+      "Thực hành trên mẫu thật mỗi buổi",
+      "Kỹ thuật massage – bấm huyệt dưỡng sinh",
+      "Cấp chứng chỉ sau khi hoàn thành"
+    ],
+    "gift": null,
+    "featured": false,
+    "img": null,
+    "img_placeholder": true
+  }
+]

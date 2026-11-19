@@ -37,7 +37,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <StarDivider />
+        {/* <StarDivider /> */}
         <Services />
         <Gallery />
         <Courses />

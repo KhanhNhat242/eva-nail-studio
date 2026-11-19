@@ -1,0 +1,356 @@
+[
+  {
+    "id": "cat-da",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Cắt da tay / chân",
+    "price": {
+      "min": 30000,
+      "max": 30000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "cung-mong",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Cứng móng – cứng móng tạo cầu",
+    "price": {
+      "min": 30000,
+      "max": 70000
+    },
+    "unit": null,
+    "note": "Làm đầy móng, fix móng yếu, dễ gãy"
+  },
+  {
+    "id": "pha-son-gel",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Phá sơn gel",
+    "price": {
+      "min": 30000,
+      "max": 30000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "pha-mong-up",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Phá móng úp / gel cứng",
+    "price": {
+      "min": 50000,
+      "max": 50000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "phu-gel-nuoi",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Phủ gel nuôi móng",
+    "price": {
+      "min": 100000,
+      "max": 100000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "dap-gel-noi",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Đắp gel nối móng / Dual Form",
+    "price": {
+      "min": 250000,
+      "max": 300000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "refill-dap-gel",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Refill móng đắp gel",
+    "price": {
+      "min": 150000,
+      "max": 200000
+    },
+    "unit": null,
+    "note": "Làm đầy chân móng gel mới lại"
+  },
+  {
+    "id": "up-mong-gel",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Úp móng gel",
+    "price": {
+      "min": 130000,
+      "max": 130000
+    },
+    "unit": null,
+    "note": "Úp móng bằng base gel cách chân"
+  },
+  {
+    "id": "refill-up",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Refill móng úp",
+    "price": {
+      "min": 80000,
+      "max": 100000
+    },
+    "unit": null,
+    "note": "Làm đầy chân móng úp mới lại"
+  },
+  {
+    "id": "biab",
+    "category": "nail-care",
+    "category_name": "Nail Care – Chăm sóc móng",
+    "name": "Builder Gel – BIAB",
+    "price": {
+      "min": 180000,
+      "max": 220000
+    },
+    "unit": null,
+    "note": "Phủ gel builder nuôi móng, có màu sẵn"
+  },
+  {
+    "id": "son-gel",
+    "category": "son",
+    "category_name": "Sơn",
+    "name": "Sơn gel / thạch",
+    "price": {
+      "min": 110000,
+      "max": 110000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "son-mat-meo",
+    "category": "son",
+    "category_name": "Sơn",
+    "name": "Sơn mắt mèo / nhũ / ngọc trai",
+    "price": {
+      "min": 130000,
+      "max": 130000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "ombre",
+    "category": "son",
+    "category_name": "Sơn",
+    "name": "Ombre lòng đào / full móng",
+    "price": {
+      "min": 70000,
+      "max": 120000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "son-3-mau",
+    "category": "son",
+    "category_name": "Sơn",
+    "name": "Sơn từ 3 màu / dặm che nền móng",
+    "price": {
+      "min": 30000,
+      "max": 30000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "french",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "French",
+    "price": {
+      "min": 99000,
+      "max": 120000
+    },
+    "unit": "set",
+    "note": null
+  },
+  {
+    "id": "trang-guong",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Tráng gương",
+    "price": {
+      "min": 99000,
+      "max": 120000
+    },
+    "unit": "set",
+    "note": null
+  },
+  {
+    "id": "ve-gel-noi",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Vẽ gel nổi",
+    "price": {
+      "min": 10000,
+      "max": 50000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "ve-co-ban",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Vẽ cơ bản",
+    "price": {
+      "min": 5000,
+      "max": 35000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "ve-hoat-hinh",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Vẽ hoạt hình / hoạ tiết",
+    "price": {
+      "min": 20000,
+      "max": 200000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "an-nhu",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Ẩn nhũ / xà cừ / hoa",
+    "price": {
+      "min": 10000,
+      "max": 30000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "marble",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Loang marble vân đá",
+    "price": {
+      "min": 15000,
+      "max": 45000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "hoa-tiet-gam",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Hoạ tiết gấm",
+    "price": {
+      "min": 15000,
+      "max": 25000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "charm",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Charm / đính đá",
+    "price": {
+      "min": 3000,
+      "max": 50000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "thu-noi",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Thú nổi / hoa nổi",
+    "price": {
+      "min": 20000,
+      "max": 80000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "sticker",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Sticker",
+    "price": {
+      "min": 3000,
+      "max": 30000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "phu-mat-meo",
+    "category": "design",
+    "category_name": "Design – Thiết kế móng",
+    "name": "Phủ mắt mèo",
+    "price": {
+      "min": 90000,
+      "max": 90000
+    },
+    "unit": null,
+    "note": "Thêm 1 lớp mắt mèo trên nền"
+  },
+  {
+    "id": "goi-30",
+    "category": "goi-dau",
+    "category_name": "Gội đầu thư giãn",
+    "name": "Gội đầu thư giãn 30 phút",
+    "price": {
+      "min": 69000,
+      "max": 69000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "goi-45",
+    "category": "goi-dau",
+    "category_name": "Gội đầu thư giãn",
+    "name": "Gội đầu thư giãn 45 phút",
+    "price": {
+      "min": 99000,
+      "max": 99000
+    },
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "noi-mi",
+    "category": "mi",
+    "category_name": "Nối mi – Uốn mi",
+    "name": "Nối mi",
+    "price": null,
+    "unit": null,
+    "note": null
+  },
+  {
+    "id": "uon-mi",
+    "category": "mi",
+    "category_name": "Nối mi – Uốn mi",
+    "name": "Uốn mi",
+    "price": null,
+    "unit": null,
+    "note": null
+  }
+]

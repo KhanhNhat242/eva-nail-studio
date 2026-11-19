@@ -4,9 +4,11 @@ import { mapEmbedSrc, telHref, zaloHref } from '@/lib/links'
 import { Container, Section, SectionHeading } from '@/components/ui/Section'
 import { ArrowIcon, buttonClass } from '@/components/ui/ButtonLink'
 import { ClockIcon, PhoneIcon, PinIcon, ShieldIcon, ZaloIcon } from '@/components/ui/Icons'
+import { getBookingOptions } from '@/lib/cms/queries'
 import { BookingForm } from './BookingForm'
 
-export function Booking() {
+export async function Booking() {
+  const options = await getBookingOptions()
   return (
     <Section id="dat-lich" tone="deep" fadeFrom="cream" labelledBy="dat-lich-title">
       <span id="lien-he" className="absolute top-0" aria-hidden />
@@ -20,7 +22,7 @@ export function Booking() {
         <div className="grid gap-12 lg:grid-cols-[1.08fr_1fr]">
           {/* Cột trái: biểu mẫu */}
           <div data-reveal="up" className="rounded-card border border-line bg-cream p-6 sm:p-8 lg:p-10">
-            <BookingForm />
+            <BookingForm options={options} />
           </div>
 
           {/* Cột phải: thông tin vận hành + bản đồ */}

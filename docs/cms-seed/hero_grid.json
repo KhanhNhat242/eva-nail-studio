@@ -1,0 +1,42 @@
+{
+  "hero1": {
+    "img": "/images/combos/son-thach-ngan.jpg",
+    "img_alt": "Móng ngắn sơn gel thạch hồng nude",
+    "img_position": "50% 55%"
+  },
+  "hero2": {
+    "img": "/images/nails/ombre-ngoc-trai-tim.jpg",
+    "img_alt": "Móng ombre nude ánh ngọc trai, trái tim đính đá",
+    "img_position": "50% 50%"
+  },
+  "hero3": {
+    "img": "/images/combos/up-son-thach.jpg",
+    "img_alt": "Móng úp dài sơn thạch hồng nude",
+    "img_position": "50% 40%"
+  },
+  "hero4": {
+    "img": "/images/nails/mat-meo-do-ruou-van-bac.jpg",
+    "img_alt": "Móng mắt mèo đỏ rượu phối vân bạc",
+    "img_position": "50% 55%"
+  },
+  "hero5": {
+    "img": "/images/nails/no-noi-mint-hong.jpg",
+    "img_alt": "Móng hồng nhũ loang mint, nơ nổi và ngọc trai",
+    "img_position": "50% 55%"
+  },
+  "hero6": {
+    "img": "/images/nails/hero-hoa-noi-hong.jpg",
+    "img_alt": "Móng ombre hồng thạch đính hoa nổi 3D",
+    "img_position": "50% 62%"
+  },
+  "hero7": {
+    "img": "/images/combos/mat-meo-bac.jpg",
+    "img_alt": "Móng sơn mắt mèo ánh bạc",
+    "img_position": "50% 50%"
+  },
+  "hero8": {
+    "img": "/images/nails/ombre-xanh-bien.jpg",
+    "img_alt": "Móng ombre xanh baby, vẽ cây dừa",
+    "img_position": "50% 50%"
+  }
+}

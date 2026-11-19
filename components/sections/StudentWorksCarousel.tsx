@@ -1,23 +1,23 @@
 'use client'
 
-import { studentWorks } from '@/data/student-works'
 import { nb } from '@/lib/format'
 import { selectForBooking } from '@/lib/booking-bus'
 import { CalendarIcon } from '@/components/ui/Icons'
 import ProfileCard from '@/components/ui/ProfileCard'
+import type { StudentWork } from '@/types/content'
 
 /**
  * Thành quả học viên bằng ProfileCard (React Bits) — thẻ nghiêng 3D + glare theo chuột (theo mẫu người dùng gửi).
  * Ô ảnh: ảnh + tên khóa + tên bài thực hành. Hàng dưới: trạng thái ("Ảnh minh họa" — luôn đủ chỗ hiển thị), nút "Đăng ký" (điền sẵn khóa).
- * ⚠ Ảnh hiện là ẢNH MINH HỌA (chưa có ảnh học viên thật) — trạng thái luôn ghi rõ, xem data/student-works.ts.
+ * ⚠ Ảnh hiện là ẢNH MINH HỌA (chưa có ảnh học viên thật) — trạng thái luôn ghi rõ, cờ `placeholder` trong CMS.
  */
-export function StudentWorksCarousel() {
+export function StudentWorksCarousel({ works }: { works: StudentWork[] }) {
   return (
     <ul
       aria-label="Thành quả học viên"
       className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-6 pt-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0"
     >
-      {studentWorks.map((w, i) => (
+      {works.map((w, i) => (
         <li
           key={w.id}
           data-reveal="up"

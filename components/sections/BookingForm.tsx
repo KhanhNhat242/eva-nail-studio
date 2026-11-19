@@ -1,17 +1,17 @@
 'use client'
 
-import { startTransition, useActionState, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { startTransition, useActionState, useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { submitBooking } from '@/app/actions/booking'
 import { initialBookingState, type BookingField, type BookingState } from '@/lib/booking-state'
-import { beautyLabel, beautyOptionGroups, consultOption, courseLabel, courseOptions, timeSlots } from '@/lib/booking-options'
+import { consultOption, optionLabels, timeSlots } from '@/lib/booking-options'
 import { VN_PHONE_RE, normalizePhone } from '@/lib/links'
 import { BOOKING_EVENT, type BookingSelection } from '@/lib/booking-bus'
-import { classShifts } from '@/data/courses'
 import { business } from '@/data/business'
 import { nb } from '@/lib/format'
 import { telHref, zaloHref } from '@/lib/links'
 import { buttonClass } from '@/components/ui/ButtonLink'
 import { CheckIcon, PhoneIcon, ZaloIcon } from '@/components/ui/Icons'
+import type { BookingOptions } from '@/types/content'
 
 
 type Mode = 'beauty' | 'course'
@@ -54,8 +54,10 @@ function SelectChevron() {
   )
 }
 
-export function BookingForm() {
+export function BookingForm({ options }: { options: BookingOptions }) {
   const uid = useId()
+  const { beautyLabel, courseLabel } = useMemo(() => optionLabels(options), [options])
+  const labelsRef = useRef({ beautyLabel, courseLabel })
   const [state, formAction, pending] = useActionState(submitBooking, initialBookingState)
   const [mode, setMode] = useState<Mode>('beauty')
   const [beautyChoice, setBeautyChoice] = useState('')
@@ -69,6 +71,10 @@ export function BookingForm() {
   const [phoneHint, setPhoneHint] = useState<string | null>(null)
   const summaryRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef(state)
+
+  useEffect(() => {
+    labelsRef.current = { beautyLabel, courseLabel }
+  }, [beautyLabel, courseLabel])
 
   useEffect(() => {
     stateRef.current = state
@@ -97,7 +103,7 @@ export function BookingForm() {
       if (m === 'beauty') setBeautyChoice(value)
       else setCourseChoice(value)
       setFlash((f) => f + 1)
-      const label = (m === 'beauty' ? beautyLabel(value) : courseLabel(value))?.split(' – ')[0]
+      const label = (m === 'beauty' ? labelsRef.current.beautyLabel(value) : labelsRef.current.courseLabel(value))?.split(' – ')[0]
       setToast(label ? `Đã chọn: ${label}` : null)
       clearTimeout(timer)
       timer = setTimeout(() => setToast(null), 3500)
@@ -177,7 +183,7 @@ export function BookingForm() {
       ) : null}
 
       {/* Accessible: tóm tắt lỗi nhận focus, mỗi mục link tới ô lỗi (lỗi chi tiết vẫn nằm dưới từng ô) */}
-      {state.status === 'error' && Object.keys(errors).length > 0 ? (
+      {state.status === 'error' ? (
         <div
           ref={summaryRef}
           tabIndex={-1}
@@ -188,6 +194,7 @@ export function BookingForm() {
           <p id={`${uid}-err-title`} className="font-medium">
             {nb(state.message)}
           </p>
+          {Object.keys(errors).length > 0 ? (
           <ul className="mt-1.5 flex flex-wrap gap-x-4">
             {(Object.keys(errors) as BookingField[]).map((f) => (
               <li key={f}>
@@ -197,6 +204,7 @@ export function BookingForm() {
               </li>
             ))}
           </ul>
+          ) : null}
         </div>
       ) : null}
 
@@ -264,7 +272,7 @@ export function BookingForm() {
                   <option value="" disabled>
                     Chọn dịch vụ, combo hoặc mẫu đã thích
                   </option>
-                  {beautyOptionGroups.map((g) => (
+                  {options.beautyGroups.map((g) => (
                     <optgroup key={g.label} label={g.label}>
                       {g.options.map((o) => (
                         <option key={o.value} value={o.value}>
@@ -319,7 +327,7 @@ export function BookingForm() {
                   <option value="" disabled>
                     Chọn khóa học
                   </option>
-                  {[...courseOptions, consultOption].map((o) => (
+                  {[...options.courseOptions, consultOption].map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -332,7 +340,7 @@ export function BookingForm() {
               <div className="relative">
                 <select id={id('shift')} name="shift" defaultValue="" className={`${inputClass} appearance-none pr-10`}>
                   <option value="">Linh hoạt / cần tư vấn</option>
-                  {classShifts.map((s) => (
+                  {options.shifts.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>

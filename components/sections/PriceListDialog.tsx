@@ -1,14 +1,14 @@
 'use client'
 
 import { useRef } from 'react'
-import { serviceCategories } from '@/data/services'
 import { business } from '@/data/business'
 import { formatPrice, nb } from '@/lib/format'
 import { ArrowIcon, buttonClass } from '@/components/ui/ButtonLink'
 import { CloseIcon } from '@/components/ui/Icons'
+import type { ServiceCategory } from '@/types/content'
 
-/** Liên kết "Xem toàn bộ bảng giá" → popup bảng giá chi tiết (data/services.ts). */
-export function PriceListDialog({ trigger = 'button' }: { trigger?: 'button' | 'link' }) {
+/** Liên kết "Xem toàn bộ bảng giá" → popup bảng giá chi tiết (dữ liệu bảng giá từ CMS). */
+export function PriceListDialog({ trigger = 'button', categories }: { trigger?: 'button' | 'link'; categories: ServiceCategory[] }) {
   const ref = useRef<HTMLDialogElement>(null)
 
   return (
@@ -55,7 +55,7 @@ export function PriceListDialog({ trigger = 'button' }: { trigger?: 'button' | '
 
           <div className="overflow-y-auto px-6 py-6 md:px-9 md:py-8">
             <div className="grid gap-10">
-              {serviceCategories.map((cat) => (
+              {categories.map((cat) => (
                 <section key={cat.id} aria-label={cat.name}>
                   <h3 className="font-serif text-[22px] font-medium">{nb(cat.name)}</h3>
                   <ul className="mt-4 divide-y divide-line border-y border-line">

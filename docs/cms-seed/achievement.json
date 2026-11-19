@@ -1,0 +1,38 @@
+[
+  {
+    "id": "hv-01",
+    "name": "Bài thực hành sơn gel",
+    "description": "Cơ bản Salon",
+    "course_id": "co-ban-salon",
+    "placeholder": true,
+    "img": "/images/nails/mat-meo-do-ruou-van-bac.jpg",
+    "img_alt": "Ảnh minh họa mẫu nail mắt mèo đỏ rượu (chưa phải bài của học viên)"
+  },
+  {
+    "id": "hv-02",
+    "name": "Bài thực hành úp móng",
+    "description": "Full Salon",
+    "course_id": "full-salon",
+    "placeholder": true,
+    "img": "/images/nails/no-noi-mint-hong.jpg",
+    "img_alt": "Ảnh minh họa mẫu nail nơ nổi mint hồng (chưa phải bài của học viên)"
+  },
+  {
+    "id": "hv-03",
+    "name": "Bài thực hành vẽ nổi",
+    "description": "Full A–Z chuyên nghiệp",
+    "course_id": "full-a-z",
+    "placeholder": true,
+    "img": "/images/nails/vo-so-sao-bien.jpg",
+    "img_alt": "Ảnh minh họa mẫu nail vỏ sò sao biển nổi 3D (chưa phải bài của học viên)"
+  },
+  {
+    "id": "hv-04",
+    "name": "Bài thực hành gội dưỡng sinh",
+    "description": "Gội dưỡng sinh 2 tuần",
+    "course_id": "goi-duong-sinh",
+    "placeholder": true,
+    "img": "/images/services/goi-dau.jpg",
+    "img_alt": "Ảnh minh họa gội đầu dưỡng sinh (chưa phải bài của học viên)"
+  }
+]

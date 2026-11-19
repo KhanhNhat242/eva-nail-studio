@@ -1,31 +1,40 @@
-import { classShifts, courseIntro, courseSlogan, mainCourses } from '@/data/courses'
+import { getCourseSection } from '@/lib/cms/queries'
 import { formatVnd, nb } from '@/lib/format'
 import { Container, Section, SectionHeading } from '@/components/ui/Section'
 import Image from 'next/image'
 import TiltedCard from '@/components/ui/TiltedCard'
 import { CourseRegisterButton } from './CourseRegisterButton'
 
-export function Courses() {
-  const [s1, s2, s3] = courseSlogan.split(' – ')
+export async function Courses() {
+  const { eyebrow, title, description, shifts, courses } = await getCourseSection()
+  // Tiêu đề dạng "A – B – C": xuống dòng trước vế cuối trên màn rộng (như thiết kế gốc)
+  const parts = title.split(' – ')
+  const last = parts.pop() ?? ''
   return (
     <Section id="khoa-hoc" tone="deep" fadeFrom="cream" spacious labelledBy="khoa-hoc-title">
       {/* Conversion-Optimized (21): so sánh rõ ràng · KHÔNG đếm ngược / "chỉ còn X suất" / tháng ưu đãi */}
       <Container className="relative">
         <SectionHeading
           id="khoa-hoc-title"
-          eyebrow="Đào tạo nghề nail & gội"
+          eyebrow={eyebrow}
           layout="center"
           title={
             <>
-              {s1} – {s2} –<br className="hidden sm:block" /> {nb(s3)}
+              {parts.length > 0 ? (
+                <>
+                  {parts.join(' – ')} –<br className="hidden sm:block" /> {nb(last)}
+                </>
+              ) : (
+                nb(last)
+              )}
             </>
           }
-          description={courseIntro}
+          description={description}
         />
 
         <div data-reveal="up" className="-mt-4 mb-12 flex flex-wrap items-center justify-center gap-2 lg:-mt-6 lg:mb-14">
-          <span className="mr-1 text-[12px] font-medium uppercase tracking-[0.22em] text-ink-soft">3 ca học</span>
-          {classShifts.map((s) => (
+          <span className="mr-1 text-[12px] font-medium uppercase tracking-[0.22em] text-ink-soft">{shifts.length} ca học</span>
+          {shifts.map((s) => (
             <span key={s} className="rounded-control border border-line bg-cream px-4 py-2 text-[13px] tabular-nums text-ink">
               {s}
             </span>
@@ -38,7 +47,7 @@ export function Courses() {
           Gói A–Z (featured): viền vàng đồng; 3 thẻ thẳng hàng (người dùng yêu cầu, không nhô). Không yếu tố gây áp lực (Conversion-Optimized).
         */}
         <div className="mx-auto grid max-w-[440px] items-stretch gap-8 md:max-w-none md:grid-cols-3 md:gap-6 lg:gap-8">
-          {mainCourses.map((c, i) => {
+          {courses.map((c, i) => {
             const featured = !!c.featured
             return (
               <div key={c.id} data-course-card className="min-h-[420px]">
@@ -90,7 +99,7 @@ export function Courses() {
                 >
                   {/* Mặt trước: ảnh nền + tên khóa + giá */}
                   <div className={`absolute inset-0 overflow-hidden rounded-card ${featured ? 'ring-[1.5px] ring-accent ring-inset' : ''}`}>
-                    <Image src={c.cover} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                    {c.cover ? <Image src={c.cover} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" /> : <div className="absolute inset-0 bg-ink" />}
                     {/* Lớp tối dần ở đáy để chữ kem đủ tương phản */}
                     <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/35 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-7 text-cream">

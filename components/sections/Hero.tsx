@@ -3,6 +3,8 @@ import { nb } from '@/lib/format'
 import { ArrowIcon, buttonClass } from '@/components/ui/ButtonLink'
 import { Star } from '@/components/ui/Star'
 import FoldText, { type FoldTextProps } from '@/components/ui/FoldText'
+import { getHeroGrid } from '@/lib/cms/queries'
+import type { HeroPhoto } from '@/types/content'
 
 /** Cấu hình FoldText theo người dùng gửi (17/11/2026) — trừ fontSize/fontWeight: kế thừa kiểu chữ hero */
 const foldConfig: FoldTextProps = {
@@ -23,29 +25,14 @@ const foldConfig: FoldTextProps = {
   creaseShading: 0.55,
 }
 
-/**
- * Ảnh lưới quanh mảng giấy — lấy ngẫu nhiên trong /public/images (người dùng yêu cầu), ưu tiên tông nude
- * + 1 ảnh đỏ rượu làm điểm nhấn như ảnh mẫu. Thứ tự: hàng trên trái → phải, rồi hàng dưới trái → phải.
- */
-const collage = [
-  { src: '/images/combos/son-thach-ngan.jpg', alt: 'Móng ngắn sơn gel thạch hồng nude', pos: '50% 55%' },
-  { src: '/images/nails/ombre-ngoc-trai-tim.jpg', alt: 'Móng ombre nude ánh ngọc trai, trái tim đính đá', pos: '50% 50%' },
-  { src: '/images/combos/up-son-thach.jpg', alt: 'Móng úp dài sơn thạch hồng nude', pos: '50% 40%' },
-  { src: '/images/nails/mat-meo-do-ruou-van-bac.jpg', alt: 'Móng mắt mèo đỏ rượu phối vân bạc', pos: '50% 55%' },
-  { src: '/images/nails/no-noi-mint-hong.jpg', alt: 'Móng hồng nhũ loang mint, nơ nổi và ngọc trai', pos: '50% 55%' },
-  { src: '/images/nails/hero-hoa-noi-hong.jpg', alt: 'Móng ombre hồng thạch đính hoa nổi 3D', pos: '50% 62%' },
-  { src: '/images/combos/mat-meo-bac.jpg', alt: 'Móng sơn mắt mèo ánh bạc', pos: '50% 50%' },
-  { src: '/images/nails/ombre-xanh-bien.jpg', alt: 'Móng ombre xanh baby, vẽ cây dừa', pos: '50% 50%' },
-] as const
-
 /** Mép giấy xé (đa giác không đều) cho mảng chữ giữa và vệt màu loang phía sau */
 const TORN =
   'polygon(3% 9%, 11% 4%, 20% 7%, 29% 2%, 38% 6%, 47% 1%, 56% 5%, 65% 2%, 74% 6%, 83% 3%, 92% 7%, 98% 13%, 96% 24%, 99% 35%, 95% 47%, 98% 58%, 96% 70%, 99% 81%, 94% 92%, 85% 97%, 76% 94%, 66% 98%, 56% 94%, 46% 99%, 36% 95%, 26% 98%, 16% 94%, 7% 97%, 2% 88%, 4% 77%, 1% 66%, 4% 54%, 1% 42%, 4% 31%, 1% 20%)'
 const STAIN =
   'polygon(6% 2%, 22% 6%, 35% 0%, 52% 5%, 68% 1%, 84% 6%, 97% 2%, 100% 20%, 95% 38%, 100% 56%, 96% 75%, 100% 94%, 82% 99%, 63% 95%, 45% 100%, 27% 95%, 10% 99%, 0% 86%, 5% 66%, 0% 47%, 4% 28%, 0% 12%)'
 
-function Photo({ i, className = '', priority = false }: { i: number; className?: string; priority?: boolean }) {
-  const p = collage[i]
+function Photo({ p, i, className = '', priority = false }: { p?: HeroPhoto; i: number; className?: string; priority?: boolean }) {
+  if (!p) return <div className={`rounded-media bg-cream-deep ${className}`} />
   return (
     <div className={`hero-unveil relative overflow-hidden rounded-media bg-cream-deep ${className}`} style={{ ['--d' as string]: `${80 + i * 70}ms` }}>
       <Image
@@ -68,7 +55,9 @@ function Photo({ i, className = '', priority = false }: { i: number; className?:
  * Desktop: 8 ảnh (4 trên · 4 dưới), cao đúng 1 màn hình, header đè lên (trong suốt).
  * Mobile: 2 ảnh trên · mảng chữ · 2 ảnh dưới — vừa 1 màn hình.
  */
-export function Hero() {
+/** Lưới 8 ảnh (hero1…hero8) sửa trong CMS. Thứ tự: hàng trên trái → phải, rồi hàng dưới trái → phải. */
+export async function Hero() {
+  const collage = await getHeroGrid()
   return (
     <section
       id="top"
@@ -78,8 +67,8 @@ export function Hero() {
     >
       {/* Lưới ảnh — desktop 4×2, chạy phía sau header; rộng tối đa 1720px, căn giữa trên màn rất rộng */}
       <div className="absolute inset-y-0 left-1/2 hidden w-full max-w-[1720px] -translate-x-1/2 grid-cols-[1fr_1.15fr_1.15fr_1fr] grid-rows-2 gap-2 p-2 lg:grid">
-        {collage.map((_, i) => (
-          <Photo key={i} i={i} priority={i < 4} />
+        {collage.map((p, i) => (
+          <Photo key={i} p={p} i={i} priority={i < 4} />
         ))}
       </div>
 
@@ -88,8 +77,8 @@ export function Hero() {
 
       {/* Mobile: 2 ảnh trên */}
       <div className="grid h-[22svh] min-h-[130px] grid-cols-2 gap-1.5 px-1.5 pt-1.5 lg:hidden">
-        <Photo i={0} priority />
-        <Photo i={3} priority />
+        <Photo p={collage[0]} i={0} priority />
+        <Photo p={collage[3]} i={3} priority />
       </div>
 
       {/* Mảng giấy xé ở giữa */}
@@ -140,8 +129,8 @@ export function Hero() {
 
       {/* Mobile: 2 ảnh dưới */}
       <div className="grid h-[20svh] min-h-[120px] grid-cols-2 gap-1.5 px-1.5 pb-1.5 lg:hidden">
-        <Photo i={5} />
-        <Photo i={7} />
+        <Photo p={collage[5]} i={5} />
+        <Photo p={collage[7]} i={7} />
       </div>
     </section>
   )

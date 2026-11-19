@@ -2,16 +2,14 @@
 
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { designFilters, nailDesigns, type NailDesign } from '@/data/nail-designs'
 import { formatVnd, nb } from '@/lib/format'
 import { selectForBooking } from '@/lib/booking-bus'
 import { buttonClass } from '@/components/ui/ButtonLink'
 import { ChevronIcon, CloseIcon, ExpandIcon } from '@/components/ui/Icons'
 import BounceCards from '@/components/ui/BounceCards'
+import type { DesignFilter, NailDesign } from '@/types/content'
 
-type FilterId = (typeof designFilters)[number]['id']
-
-const tagLabel = Object.fromEntries(designFilters.map((f) => [f.id, f.label])) as Record<FilterId, string>
+type FilterId = string
 
 function bookDesign(d: NailDesign) {
   selectForBooking({ mode: 'beauty', value: `design:${d.id}` })
@@ -82,14 +80,15 @@ function TagStack({ filter, items, onOpen }: { filter: FilterId; items: NailDesi
   )
 }
 
-export function GalleryGrid() {
+export function GalleryGrid({ filters, designs: nailDesigns }: { filters: DesignFilter[]; designs: NailDesign[] }) {
+  const tagLabel = useMemo(() => Object.fromEntries(filters.map((f) => [f.id, f.label])) as Record<FilterId, string>, [filters])
   const [filter, setFilter] = useState<FilterId>('all')
   const [active, setActive] = useState<number | null>(null)
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   const items = useMemo(
     () => (filter === 'all' ? nailDesigns : nailDesigns.filter((d) => d.tags.includes(filter))),
-    [filter],
+    [filter, nailDesigns],
   )
 
   const open = (i: number) => {
@@ -120,7 +119,7 @@ export function GalleryGrid() {
       {/* Thanh lọc nhanh */}
       {/* Micro-interactions + Accessible: chip 44px, aria-pressed, số lượng, thông báo kết quả */}
       <div role="group" aria-label="Lọc mẫu nail theo nhóm" className="no-scrollbar -mx-5 mb-8 flex gap-2 overflow-x-auto px-5 sm:mx-0 sm:justify-center sm:px-0 lg:mb-10">
-        {designFilters.map((f) => {
+        {filters.map((f) => {
           const selected = filter === f.id
           const count = f.id === 'all' ? nailDesigns.length : nailDesigns.filter((d) => d.tags.includes(f.id)).length
           return (
@@ -178,7 +177,7 @@ export function GalleryGrid() {
             </button>
 
             <div className="flex flex-1 flex-col pt-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent-deep">{tagLabel[d.tags[0]]}</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent-deep">{tagLabel[d.tags[0]] ?? ''}</p>
               <h3 className="mt-1.5 flex-1 text-[15px] font-medium leading-snug text-ink md:text-[16px]">{nb(d.name)}</h3>
               <p className="mt-2 text-[14px] text-ink-soft">
                 Giá từ <span className="font-medium text-ink">{formatVnd(d.priceFrom)}</span>

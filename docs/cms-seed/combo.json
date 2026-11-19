@@ -1,0 +1,34 @@
+[
+  {
+    "id": "combo-cat-da-son-thach",
+    "title": "Cắt da – Sơn thạch",
+    "description": "Cắt da sạch, dũa form chuẩn và sơn gel thạch bóng bền màu",
+    "price": 129000,
+    "img": "/images/combos/son-thach-ngan.jpg",
+    "img_alt": "Ảnh minh họa: móng ngắn sơn gel thạch hồng nude bóng"
+  },
+  {
+    "id": "combo-cat-da-mat-meo",
+    "title": "Cắt da – Sơn mắt mèo",
+    "description": "Cắt da sạch, dũa form chuẩn và sơn mắt mèo không nền",
+    "price": 149000,
+    "img": "/images/combos/mat-meo-bac.jpg",
+    "img_alt": "Ảnh minh họa: móng sơn mắt mèo ánh bạc"
+  },
+  {
+    "id": "combo-up-son-thach",
+    "title": "Úp móng – Sơn thạch",
+    "description": "Úp móng gel cách chân, dũa form tinh tế và sơn gel thạch",
+    "price": 199000,
+    "img": "/images/combos/up-son-thach.jpg",
+    "img_alt": "Ảnh minh họa: móng úp dài sơn thạch hồng nude ánh ngọc trai"
+  },
+  {
+    "id": "combo-up-mat-meo",
+    "title": "Úp móng – Sơn mắt mèo",
+    "description": "Úp móng gel cách chân, dũa form tinh tế và sơn mắt mèo",
+    "price": 229000,
+    "img": "/images/combos/up-mat-meo.jpg",
+    "img_alt": "Ảnh minh họa: móng úp dài sơn mắt mèo tím lavender"
+  }
+]

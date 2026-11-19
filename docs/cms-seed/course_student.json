@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cs-0001",
+    "name": "Học viên thử nghiệm 1",
+    "phone_number": "0900000011",
+    "course_name": "full-a-z",
+    "session": "09:30 – 13:00",
+    "note": "Dữ liệu mẫu để test CMS"
+  },
+  {
+    "id": "cs-0002",
+    "name": "Học viên thử nghiệm 2",
+    "phone_number": "0900000012",
+    "course_name": "goi-duong-sinh",
+    "session": null,
+    "note": null
+  },
+  {
+    "id": "cs-0003",
+    "name": "Học viên thử nghiệm 3",
+    "phone_number": "0900000013",
+    "course_name": "tu-van",
+    "session": "17:30 – 20:30",
+    "note": "Chưa chọn khóa, cần tư vấn"
+  }
+]

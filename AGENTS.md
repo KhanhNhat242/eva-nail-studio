@@ -57,16 +57,19 @@ Mọi thay đổi — code, nội dung, thiết kế, tính năng mới — **b�
 
 ## 4. Kiến trúc & code
 
-- Stack cố định: **Next.js 16.4.6 (App Router) · React 19.3 · TypeScript · Tailwind CSS 4 · Ant Design 6**. Không thêm thư viện mới khi chưa hỏi người dùng.
+- Stack cố định: **Next.js 16.4.6 (App Router) · React 19.3 · TypeScript · Tailwind CSS 4 · Ant Design 6 · MongoDB (driver `mongodb`)**. Không thêm thư viện mới khi chưa hỏi người dùng.
 - Next.js bản này khác dữ liệu huấn luyện: **đọc tài liệu trong `node_modules/next/dist/docs/` trước khi dùng API** (đặc biệt: `01-getting-started/05-server-and-client-components.md`, `08-caching.md`, `12-images.md`, `14-metadata-and-og-images.md`, `02-guides/forms.md`, `02-guides/server-actions.md`). `next.config.ts` đang bật `cacheComponents` và `partialPrefetching` — tuân thủ quy tắc của các tính năng này (dữ liệu động nằm trong `<Suspense>`…).
 - Mặc định **Server Component**; chỉ thêm `'use client'` cho phần thật sự cần tương tác (lọc, lightbox, form state, menu mobile) và giữ chúng nhỏ, ở lá của cây component.
 - Cấu trúc thư mục:
   - `app/<route>/page.tsx` — route theo sitemap trong tài liệu mục 9 (slug tiếng Việt không dấu, kebab-case: `dich-vu`, `mau-nail`, `khoa-hoc`, `thanh-qua-hoc-vien`, `dat-lich`, `lien-he`).
   - `components/` — component dùng chung (`layout/`, `ui/`, `sections/`…), tên file PascalCase.
-  - `data/` — dữ liệu tĩnh có kiểu: `business.ts` (thông tin tiệm), `services.ts`, `courses.ts`, `nail-designs.ts`, `student-works.ts`. **Mọi nội dung kinh doanh nằm ở đây**, không nằm trong JSX.
+  - **Nội dung kinh doanh nằm trong MongoDB** (sửa qua CMS `/admin`, dữ liệu khởi tạo `docs/cms-seed/`), không nằm trong JSX. Đọc qua `lib/cms/queries.ts` (`'use cache'` + `cacheTag`); ghi qua Server Action admin + `updateTag`. Kiểu dữ liệu: `types/cms.ts` (DB) và `types/content.ts` (component).
+  - `data/business.ts` — thông tin tiệm (tên, SĐT, giờ, địa chỉ) vẫn tĩnh, khai báo một lần.
   - `lib/` — tiện ích (format tiền, validate SĐT, link Zalo/tel), `types/` nếu cần.
-- Thêm mẫu nail mới = thêm 1 object vào `data/nail-designs.ts` (+ ảnh). Không cần sửa component. Giữ nguyên nguyên tắc này cho mọi danh sách.
-- Form (đặt lịch, đăng ký học): Server Action + validate phía server (SĐT VN: `^(0|\+84)(3|5|7|8|9)\d{8}$`), thông báo lỗi tiếng Việt. Chưa có backend → để `// TODO(integration)` rõ ràng; **không** hiển thị thông báo giả như "đã gửi nhắc lịch qua Zalo".
+- Thêm mẫu nail mới = thêm trong CMS (ảnh đặt trước vào `public/images/nails/`). Không cần sửa component. Giữ nguyên nguyên tắc này cho mọi danh sách.
+- Component client không import dữ liệu trực tiếp: component server cha đọc DB rồi truyền props.
+- Mọi Server Action của `/admin` phải gọi `verifyAdmin()` đầu tiên (proxy chỉ là lớp chặn sơ bộ).
+- Form (đặt lịch, đăng ký học): Server Action + validate phía server (SĐT VN: `^(0|\+84)(3|5|7|8|9)\d{8}$`), thông báo lỗi tiếng Việt. Lưu vào MongoDB; ghi lỗi → báo lỗi, **không** hiển thị thông báo giả như "đã gửi nhắc lịch qua Zalo".
 - Ant Design: dùng cho form/input/date-time picker/modal khi tiện; chỉnh theme qua `ConfigProvider` theo token màu ở mục 3, locale `vi_VN`. Bố cục/spacing dùng Tailwind. Không để style mặc định xanh của antd lộ ra.
 - TypeScript strict, không `any`. Chạy `npm run lint` và `npm run build` không lỗi trước khi báo xong.
 - **Không rớt 1 chữ xuống dòng cuối** (desktop/tablet/mobile): mọi chuỗi chữ hiển thị đi qua `nb()` trong `lib/format.ts`; chữ viết thẳng trong JSX thì dùng `&nbsp;` giữa hai từ cuối. CSS `text-wrap: pretty/balance` đã bật sẵn trong `globals.css`.

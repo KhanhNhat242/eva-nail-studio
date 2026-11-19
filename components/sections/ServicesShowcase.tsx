@@ -2,50 +2,9 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { featuredServices, type FeaturedService } from '@/data/services'
-import { courseIntro, mainCourses } from '@/data/courses'
-import { formatPrice, formatVnd, nb } from '@/lib/format'
+import { nb } from '@/lib/format'
 import { ArrowIcon, buttonClass } from '@/components/ui/ButtonLink'
-
-type ShowcaseItem = {
-  id: string
-  title: string
-  description: string
-  priceLabel: string
-  cta: { label: string; href: string }
-  image?: { src: string; alt: string }
-  /** Chữ đè lên ảnh (thẻ khóa học) — có lớp tối dần ở đáy để chữ kem đủ tương phản */
-  dark?: { kicker: string; heading: string }
-}
-
-const svc = Object.fromEntries(featuredServices.map((s) => [s.id, s])) as Record<string, FeaturedService>
-const minCourse = Math.min(...mainCourses.map((c) => c.price))
-
-const fromService = (s: FeaturedService): ShowcaseItem => ({
-  id: s.id,
-  title: s.title,
-  description: s.description,
-  priceLabel: formatPrice(s.price, s.priceLabel),
-  cta: { label: 'Đặt lịch', href: '#dat-lich' },
-  image: { src: s.image, alt: s.imageAlt },
-})
-
-/** Thứ tự thẻ: Nail → Khóa học (giữ đào tạo nổi bật, REQUIREMENTS mục 1) → Gội → Mi */
-const items: ShowcaseItem[] = [
-  fromService(svc.nail),
-  {
-    id: 'khoa-hoc',
-    title: 'Đào tạo nghề nail & gội',
-    description: courseIntro,
-    priceLabel: `Học phí từ ${formatVnd(minCourse)}`,
-    cta: { label: 'Xem khóa học', href: '#khoa-hoc' },
-    // Ảnh minh họa (người dùng yêu cầu 17/11/2026, thay nền đen): mẫu tráng gương chụp trong salon
-    image: { src: '/images/nails/trang-guong-chrome.jpg', alt: 'Bộ móng tráng gương chrome thực hiện tại salon Eva' },
-    dark: { kicker: 'Khóa học tại Eva', heading: 'Học nghề ngay tại salon đang vận hành' },
-  },
-  fromService(svc.goi),
-  fromService(svc.mi),
-]
+import type { ServiceSectionContent } from '@/types/content'
 
 /** Vị trí từng thẻ theo khoảng cách k = i − active (0 = thẻ chính, 1..3 = thẻ phụ phía sau, <0 = đã qua). */
 function cardStyle(k: number) {
@@ -60,7 +19,7 @@ function cardStyle(k: number) {
  * Section được ghim (sticky); cuộn trong phạm vi section → thẻ chính trượt xuống & mờ dần,
  * thẻ phụ phóng to thành thẻ chính và trượt xuống; mô tả bên phải đổi theo thẻ đang hiện.
  */
-export function ServicesShowcase() {
+export function ServicesShowcase({ title, description, items }: ServiceSectionContent) {
   const sectionRef = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
   const n = items.length
@@ -102,6 +61,7 @@ export function ServicesShowcase() {
   }
 
   const current = items[active]
+  if (!current) return null
 
   return (
     <section
@@ -153,10 +113,10 @@ export function ServicesShowcase() {
               id="dich-vu-title"
               className="font-serif text-[30px] font-medium leading-[1.04] tracking-[-0.025em] text-ink sm:text-[38px] lg:text-[48px]"
             >
-              {nb('Làm đẹp tại Eva, học nghề cùng Eva')}
+              {nb(title)}
             </h2>
             <p className="mt-3 hidden text-[14px] leading-[1.7] text-ink-soft sm:block lg:mt-5 lg:text-base">
-              {nb('Nail gel, gội đầu thư giãn, nối mi – uốn mi, và các khóa đào tạo nghề nail, gội ngay tại tiệm ở Gò Vấp.')}
+              {nb(description)}
             </p>
 
             <div className="mt-5 border-t border-line pt-5 lg:mt-8 lg:pt-8" aria-live="polite">

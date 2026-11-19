@@ -1,0 +1,67 @@
+[
+  {
+    "id": "nail",
+    "title": "Chăm sóc & Thiết kế Nail",
+    "description": "Chuyên gel, không làm bột. Từ cắt da, úp móng đến vẽ nổi, đính đá theo đúng gu của bạn.",
+    "price": {
+      "min": 30000,
+      "max": 300000
+    },
+    "price_label": null,
+    "img": "/images/nails/hero-hoa-noi-hong.jpg",
+    "img_alt": "Bộ móng gel hồng đính hoa nổi 3D tại Eva Nail Studio",
+    "cta": {
+      "label": "Đặt lịch",
+      "href": "#dat-lich"
+    }
+  },
+  {
+    "id": "khoa-hoc",
+    "title": "Đào tạo nghề nail & gội",
+    "description": "Lộ trình kèm cặp cá nhân từ 3 đến 5 tháng, thực hành trực tiếp trên mẫu thật, ra nghề làm được ngay tại salon.",
+    "price": {
+      "min": 8000000,
+      "max": null
+    },
+    "price_label": "Học phí từ",
+    "img": "/images/nails/trang-guong-chrome.jpg",
+    "img_alt": "Bộ móng tráng gương chrome thực hiện tại salon Eva",
+    "cta": {
+      "label": "Xem khóa học",
+      "href": "#khoa-hoc"
+    },
+    "overlay": {
+      "kicker": "Khóa học tại Eva",
+      "heading": "Học nghề ngay tại salon đang vận hành"
+    }
+  },
+  {
+    "id": "goi",
+    "title": "Gội đầu thư giãn",
+    "description": "Gội sạch, massage da đầu nhẹ nhàng giúp bạn thả lỏng sau một ngày dài bận rộn.",
+    "price": {
+      "min": 69000,
+      "max": 99000
+    },
+    "price_label": null,
+    "img": "/images/services/goi-dau.jpg",
+    "img_alt": "Khách được gội đầu thư giãn, massage da đầu",
+    "cta": {
+      "label": "Đặt lịch",
+      "href": "#dat-lich"
+    }
+  },
+  {
+    "id": "mi",
+    "title": "Nối mi – Uốn mi",
+    "description": "Hàng mi cong tự nhiên, tôn đôi mắt sáng hơn mà vẫn nhẹ nhàng, phù hợp đi làm mỗi ngày.",
+    "price": null,
+    "price_label": "Liên hệ tư vấn",
+    "img": "/images/lashes/uon-mi-01.jpg",
+    "img_alt": "Cận cảnh hàng mi uốn cong tự nhiên",
+    "cta": {
+      "label": "Đặt lịch",
+      "href": "#dat-lich"
+    }
+  }
+]

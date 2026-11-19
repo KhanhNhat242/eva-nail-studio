@@ -1,0 +1,56 @@
+{
+  "categories": [
+    {
+      "id": "nail-care",
+      "name": "Nail Care – Chăm sóc móng"
+    },
+    {
+      "id": "son",
+      "name": "Sơn"
+    },
+    {
+      "id": "design",
+      "name": "Design – Thiết kế móng"
+    },
+    {
+      "id": "goi-dau",
+      "name": "Gội đầu thư giãn"
+    },
+    {
+      "id": "mi",
+      "name": "Nối mi – Uốn mi"
+    }
+  ],
+  "price": [
+    "cat-da",
+    "cung-mong",
+    "pha-son-gel",
+    "pha-mong-up",
+    "phu-gel-nuoi",
+    "dap-gel-noi",
+    "refill-dap-gel",
+    "up-mong-gel",
+    "refill-up",
+    "biab",
+    "son-gel",
+    "son-mat-meo",
+    "ombre",
+    "son-3-mau",
+    "french",
+    "trang-guong",
+    "ve-gel-noi",
+    "ve-co-ban",
+    "ve-hoat-hinh",
+    "an-nhu",
+    "marble",
+    "hoa-tiet-gam",
+    "charm",
+    "thu-noi",
+    "sticker",
+    "phu-mat-meo",
+    "goi-30",
+    "goi-45",
+    "noi-mi",
+    "uon-mi"
+  ]
+}

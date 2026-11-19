@@ -1,0 +1,16 @@
+{
+  "eyebrow": "Đào tạo nghề nail & gội",
+  "title": "Học đúng – Làm được – Tự tin mở tiệm",
+  "description": "Lộ trình kèm cặp cá nhân từ 3 đến 5 tháng, thực hành trực tiếp trên mẫu thật, ra nghề làm được ngay tại salon.",
+  "session": [
+    "09:30 – 13:00",
+    "13:30 – 17:00",
+    "17:30 – 20:30"
+  ],
+  "session_confirmed": false,
+  "course": [
+    "co-ban-salon",
+    "full-salon",
+    "full-a-z"
+  ]
+}

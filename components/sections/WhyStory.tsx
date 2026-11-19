@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { usps } from '@/data/usps'
 import { nb } from '@/lib/format'
 import { ArrowIcon } from '@/components/ui/ButtonLink'
+import type { Usp } from '@/types/content'
 
 const HEADER = () => (window.innerWidth >= 1024 ? 76 : 64)
 
@@ -38,7 +38,7 @@ function slot(k: number): CSSProperties {
  * nền ink; trái: tiêu đề serif rất lớn + mô tả + nút bo tròn; phải: carousel ảnh xếp nhỏ dần + thanh tiến độ.
  * Section ghim (sticky): cuộn trong phạm vi section → chuyển sang ảnh tiếp theo, chữ bên trái đổi theo.
  */
-export function WhyStory() {
+export function WhyStory({ eyebrow, usps }: { eyebrow: string; usps: Usp[] }) {
   const n = usps.length
   const sectionRef = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
@@ -77,6 +77,7 @@ export function WhyStory() {
   }
 
   const u = usps[active]
+  if (!u) return null
 
   return (
     <section
@@ -94,7 +95,7 @@ export function WhyStory() {
           <div className="flex flex-col lg:justify-center">
             <div>
               <h2 id="vi-sao-title" className="text-[12px] font-medium uppercase tracking-[0.22em] text-accent">
-                {nb('Vì sao chọn Eva')} · {String(active + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
+                {nb(eyebrow)} · {String(active + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
               </h2>
               <p
                 key={`t-${u.id}`}

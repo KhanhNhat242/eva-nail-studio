@@ -1,0 +1,29 @@
+[
+  {
+    "id": "bk-0001",
+    "name": "Khách thử nghiệm 1",
+    "phone_number": "0900000001",
+    "service": "combo-cat-da-mat-meo",
+    "date": "2026-11-25",
+    "time": "10:00",
+    "note": "Dữ liệu mẫu để test CMS"
+  },
+  {
+    "id": "bk-0002",
+    "name": "Khách thử nghiệm 2",
+    "phone_number": "0900000002",
+    "service": "design:mat-meo-lavender",
+    "date": "2026-11-26",
+    "time": "14:30",
+    "note": null
+  },
+  {
+    "id": "bk-0003",
+    "name": "Khách thử nghiệm 3",
+    "phone_number": "0900000003",
+    "service": "goi-45",
+    "date": "2026-11-27",
+    "time": "19:30",
+    "note": null
+  }
+]

@@ -1,4 +1,4 @@
-import type { PriceValue } from '@/data/services'
+import type { PriceRange } from '@/types/cms'
 
 const vnd = new Intl.NumberFormat('vi-VN')
 
@@ -7,11 +7,12 @@ export function formatVnd(value: number): string {
   return `${vnd.format(value)}đ`
 }
 
-/** Số / khoảng giá / null -> chuỗi hiển thị thống nhất. */
-export function formatPrice(price: PriceValue, fallback = 'Liên hệ tư vấn'): string {
+/** Giá cố định / khoảng giá / "từ …" / null -> chuỗi hiển thị thống nhất. */
+export function formatPrice(price: PriceRange, fallback = 'Liên hệ tư vấn'): string {
   if (price === null) return fallback
-  if (Array.isArray(price)) return `${formatVnd(price[0])} – ${formatVnd(price[1])}`
-  return formatVnd(price)
+  if (price.max === null) return `Từ ${formatVnd(price.min)}`
+  if (price.max === price.min) return formatVnd(price.min)
+  return `${formatVnd(price.min)} – ${formatVnd(price.max)}`
 }
 
 /**

@@ -260,8 +260,9 @@ Thông tin bổ sung từ poster (dùng làm nội dung chi tiết, cần khách
 - Demo: thể hiện luồng (xác nhận + nút Zalo) và ghi chú "tiệm sẽ nhắn Zalo nhắc lịch trước giờ hẹn". **Không** được hiển thị thông báo giả kiểu "Đã gửi tin nhắc qua Zalo" nếu chưa tích hợp thật.
 
 ### 8.3 Lưu dữ liệu form
-- Demo: xử lý bằng Server Action, validate phía server, trả kết quả thành công; chưa có backend lưu trữ (ghi rõ trong code là TODO tích hợp).
-- Giai đoạn sau: gửi về Google Sheet / email / Zalo OA (chờ chốt).
+- Server Action validate phía server rồi **lưu vào MongoDB** (collection `booking_customer` / `course_student`, kèm `status`, `created_at`) — người dùng chốt 19/11/2026. Admin xem và xử lý trong CMS (mục 15).
+- Ghi DB lỗi → báo lỗi tiếng Việt và mời nhắn Zalo; **không** báo thành công khi chưa lưu được.
+- Chưa làm: gửi thông báo về email / Zalo OA, Zalo ZNS (mục 13 #8).
 
 ---
 
@@ -334,11 +335,31 @@ Lưu ý:
 | 5 | Ảnh thành quả học viên thật | Mục 7 |
 | 6 | URL Instagram, TikTok | Footer, Liên hệ |
 | 7 | Logo bản vector / nền trong suốt | Header, favicon |
-| 8 | Nơi nhận dữ liệu form (Sheet/email/Zalo OA) và có làm Zalo ZNS không | Mục 8 |
+| 8 | ~~Nơi nhận dữ liệu form~~ → MongoDB + CMS (19/11/2026). Còn mở: có cần báo về email / Zalo OA và làm Zalo ZNS không | Mục 8 |
 | 9 | Khách đồng ý xem demo? Hạn giao demo? Điều cần tránh? | Tiến độ |
 | 10 | Tiệm mở cửa những ngày nào trong tuần (có nghỉ ngày nào không)? | JSON-LD giờ mở cửa (đang bỏ trống) |
 | 11 | Ảnh gội đầu thật tại tiệm (demo đang cắt từ poster khóa gội) | Thẻ "Gội đầu thư giãn" |
 | 12 | Ảnh mẫu không watermark (đa số ảnh có chữ "EvaNailStudio") | Thư viện mẫu, Hero |
+
+---
+
+## 15. CMS quản trị (`/admin`)
+
+Người dùng yêu cầu 19/11/2026. Chốt: MongoDB, deploy VPS, CMS nằm chung app Next.js, một tài khoản admin (biến môi trường), ảnh chọn từ `public/images` (chưa upload).
+
+- **Đăng nhập**: một tài khoản; mật khẩu lưu dạng băm scrypt trong `ADMIN_PASSWORD_HASH`; cookie phiên ký HMAC, hạn 7 ngày. Trang `/admin` có `noindex`.
+- **Nội dung sửa được**: lưới ảnh Hero, Dịch vụ, Hot combo, Bảng giá, Mẫu nail "Vừa ra lò", Khóa học, Thành quả học viên, Vì sao chọn Eva — tiêu đề/nhãn của section + thêm/sửa/xóa/đổi thứ tự item. Sửa xong trang chủ cập nhật ngay.
+- **Không qua CMS**: thông tin tiệm (`data/business.ts`: tên, SĐT, giờ, địa chỉ) — vẫn khai báo một lần trong code.
+- **Khách đặt lịch / học viên đăng ký**: danh sách, lọc theo trạng thái, đổi trạng thái (mới · đã xác nhận · hoàn tất · đã huỷ), xóa.
+- **Cờ chờ xác nhận phải giữ và hiển thị trong CMS**: `price_confirmed` (giá mẫu nail), `placeholder` (ảnh thành quả học viên — website luôn ghi "Ảnh minh họa" khi bật), `session_confirmed` (ca học). Quy tắc mục 1–7 vẫn áp dụng cho nội dung nhập qua CMS (không bột/acrylic, không bịa số liệu).
+- **Dữ liệu khởi tạo**: `docs/cms-seed/*.json` → `npm run db:seed`. Triển khai: `docs/DEPLOY.md`.
+- **Route**:
+  - `/admin/dang-nhap` (đăng nhập), `/admin` (tổng quan);
+  - `/admin/dat-lich` và `/admin/hoc-vien` (khách đặt lịch, học viên đăng ký);
+  - `/admin/hero` (lưới ảnh Hero);
+  - `/admin/{dich-vu, combo, bang-gia, mau-nail, khoa-hoc, thanh-qua, vi-sao}` (các khối nội dung).
+
+  `app/admin/layout.tsx` lồng trong root layout chung, có theme antd riêng. Không dùng nhiều root layout, để tránh phải bật cờ thử nghiệm `globalNotFound`.
 
 ---
 
@@ -377,3 +398,5 @@ Lưu ý:
 - **17/11/2026 – Thẻ "Khóa học" trong Dịch vụ có ảnh minh họa** (thay nền đen): ảnh mẫu tráng gương + lớp tối dần ở đáy để chữ kem đủ tương phản.
 - **17/11/2026 – Menu mobile toàn màn hình**: bấm nút menu → header phủ kín màn hình (100dvh), trang phía sau khóa cuộn (giữ đúng vị trí khi đóng); bấm mục menu → đóng menu rồi cuộn mượt tới section.
 - **17/11/2026 – "Vì sao chọn Eva" bớt khoảng trống** (người dùng yêu cầu): chữ bên trái gom thành một khối căn giữa theo chiều dọc; khung ảnh desktop theo tỉ lệ 16:10 (tối đa 560px) thay vì cao cả màn hình; ở các mục cuối, ảnh đầu danh sách quay vòng vào hàng chờ để bên phải không trống.
+- **19/11/2026 – Dữ liệu mẫu cho backend CMS** (người dùng yêu cầu, chuẩn bị dựng CMS): `docs/cms-seed/*.json` — 17 collection (hero_grid, service/_section, combo/_section, price/price_list, model/_section, course/_section, achievement/_section, whyus/_section, booking_customer, course_student), sinh từ `data/*.ts` + nội dung section hiện tại; giữ nguyên các cờ chờ xác nhận. Quy ước trong `docs/cms-seed/README.md`. Website chưa đọc từ các file này.
+- **19/11/2026 – CMS + MongoDB** (mục 15): website đọc nội dung từ MongoDB (cache theo tag, CMS lưu → làm mới ngay); form đặt lịch / đăng ký học lưu vào MongoDB; trang quản trị `/admin`. Thêm dependency `mongodb` (người dùng đồng ý khi duyệt kế hoạch). Các file `data/*.ts` trừ `business.ts` được thay bằng DB.

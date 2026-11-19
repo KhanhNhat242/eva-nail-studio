@@ -1,0 +1,31 @@
+{
+  "title": "Vừa ra lò: mẫu nail mới tại Eva",
+  "categories": [
+    {
+      "id": "mat-meo",
+      "label": "Mắt mèo"
+    },
+    {
+      "id": "ombre",
+      "label": "Ombre"
+    },
+    {
+      "id": "dinh-da",
+      "label": "Đính đá"
+    },
+    {
+      "id": "ve-noi-3d",
+      "label": "Vẽ nổi 3D"
+    }
+  ],
+  "model": [
+    "mat-meo-do-ruou-van-bac",
+    "hoa-noi-3d-hong-thach",
+    "vo-so-sao-bien",
+    "lua-hong-den",
+    "dinh-da-da-bao",
+    "mat-meo-lavender",
+    "ombre-ngoc-trai-tim",
+    "no-noi-mint-hong"
+  ]
+}

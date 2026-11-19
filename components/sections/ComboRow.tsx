@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { hotCombos } from '@/data/services'
 import { formatVnd, nb } from '@/lib/format'
 import { QuickBookButton } from './QuickBookButton'
+import type { HotCombo } from '@/types/content'
 
 /**
  * Hàng 4 combo — bố cục theo ảnh mẫu người dùng gửi (17/11/2026).
@@ -13,7 +13,7 @@ import { QuickBookButton } from './QuickBookButton'
  * nền phần chữ bên trái đổi sang `blush`; các thẻ khác thu hẹp.
  * Màn nhỏ (không có hover): vẫn 1 hàng, vuốt ngang, ảnh hiện sẵn phía trên.
  */
-export function ComboRow() {
+export function ComboRow({ combos }: { combos: HotCombo[] }) {
   const [active, setActive] = useState<number | null>(null)
 
   return (
@@ -24,7 +24,7 @@ export function ComboRow() {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null)
       }}
     >
-      {hotCombos.map((c, i) => {
+      {combos.map((c, i) => {
         const isActive = active === i
         return (
           <article
