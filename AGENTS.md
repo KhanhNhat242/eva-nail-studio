@@ -57,7 +57,7 @@ Mọi thay đổi — code, nội dung, thiết kế, tính năng mới — **b�
 
 ## 4. Kiến trúc & code
 
-- Stack cố định: **Next.js 16.4.3 (App Router) · React 19.3 · TypeScript · Tailwind CSS 4 · Ant Design 6**. Không thêm thư viện mới khi chưa hỏi người dùng.
+- Stack cố định: **Next.js 16.4.6 (App Router) · React 19.3 · TypeScript · Tailwind CSS 4 · Ant Design 6**. Không thêm thư viện mới khi chưa hỏi người dùng.
 - Next.js bản này khác dữ liệu huấn luyện: **đọc tài liệu trong `node_modules/next/dist/docs/` trước khi dùng API** (đặc biệt: `01-getting-started/05-server-and-client-components.md`, `08-caching.md`, `12-images.md`, `14-metadata-and-og-images.md`, `02-guides/forms.md`, `02-guides/server-actions.md`). `next.config.ts` đang bật `cacheComponents` và `partialPrefetching` — tuân thủ quy tắc của các tính năng này (dữ liệu động nằm trong `<Suspense>`…).
 - Mặc định **Server Component**; chỉ thêm `'use client'` cho phần thật sự cần tương tác (lọc, lightbox, form state, menu mobile) và giữ chúng nhỏ, ở lá của cây component.
 - Cấu trúc thư mục:
