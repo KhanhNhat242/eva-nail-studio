@@ -29,7 +29,7 @@ Nội dung **sinh ra từ `data/*.ts` và các section đang chạy trên trang 
   - `price: null` nghĩa là "Liên hệ tư vấn" (nối mi, uốn mi chưa có giá).
 - `combo.price`, `model.price`, `course.price` là số đơn. Với mẫu nail, đây là giá **"từ"**.
 - Ảnh là đường dẫn trong `public/` (`/images/...`); khi lên CMS, đổi thành URL của kho media.
-- **Xóa mềm** (người dùng yêu cầu 20/11/2026): mọi item trong `achievement`, `combo`, `course`, `course_student`, `model`, `price`, `service`, `whyus` có `"is_deleted": false`. Bấm "Xóa" trong CMS chỉ đổi thành `true`: bản ghi vẫn còn trong DB nhưng bị ẩn khỏi website, CMS và form, và id bị gỡ khỏi section. `booking_customer` vẫn xóa hẳn.
+- **Xóa mềm** (người dùng yêu cầu 20/11/2026): mọi item trong `achievement`, `booking_customer`, `combo`, `course`, `course_student`, `model`, `price`, `service`, `whyus` có `"is_deleted": false`. Bấm "Xóa" trong CMS chỉ đổi thành `true`: bản ghi vẫn còn trong DB nhưng bị ẩn khỏi website, CMS và form, và id bị gỡ khỏi section. Khi xóa mềm, hệ thống lưu thêm `deleted_at` (Date); TTL index tự xóa vĩnh viễn sau 30 ngày; khôi phục thì gỡ `deleted_at`. File seed không có `deleted_at`.
 
 ## Trường thêm ngoài mô tả gốc
 

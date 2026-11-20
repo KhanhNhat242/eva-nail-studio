@@ -5,7 +5,7 @@ import { getDeletedStudents, getStudents, type CourseStudentRow } from '@/lib/cm
 import { BookingTable } from '@/components/admin/BookingTable'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { PanelFallback } from '@/components/admin/PanelFallback'
-import { deleteStudent, setStatus } from '@/app/admin/actions/hoc-vien'
+import { deleteStudent, restoreDeletedStudent, setStatus } from '@/app/admin/actions/hoc-vien'
 
 export const metadata: Metadata = { title: 'Đăng ký học' }
 
@@ -25,9 +25,9 @@ async function StudentsTable() {
   const [students, deleted] = await Promise.all([getStudents(), getDeletedStudents()])
   return (
     <BookingTable
-      actions={{ setStatus, remove: deleteStudent }}
+      actions={{ setStatus, remove: deleteStudent, restore: restoreDeletedStudent }}
       rows={students.map(toRow)}
-      deletedRows={deleted.map(toRow)}
+      deletedRows={deleted.map((s) => ({ ...toRow(s), purge_at: s.purge_at }))}
       choiceTitle="Khóa học"
       whenTitle="Ca học"
     />

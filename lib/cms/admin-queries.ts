@@ -3,7 +3,7 @@ import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { NOT_DELETED, col } from '@/lib/db/mongo'
 import { listUploads } from '@/lib/media'
-import { SECTION_ID, type BookingCustomerDoc, type CourseStudentDoc } from '@/types/cms'
+import { PURGE_AFTER_DAYS, SECTION_ID, type BookingCustomerDoc, type CourseStudentDoc } from '@/types/cms'
 import type { EntityDef, OptionSource } from './schema'
 
 /**
@@ -12,7 +12,15 @@ import type { EntityDef, OptionSource } from './schema'
  */
 
 export type PlainDoc = Record<string, unknown> & { id: string }
+
+/** Ngày bị xóa vĩnh viễn (ISO) = deleted_at + PURGE_AFTER_DAYS; null nếu thiếu deleted_at. */
+export function purgeAt(deletedAt: unknown): string | null {
+  const t = deletedAt instanceof Date ? deletedAt.getTime() : typeof deletedAt === 'string' ? Date.parse(deletedAt) : NaN
+  return Number.isFinite(t) ? new Date(t + PURGE_AFTER_DAYS * 86_400_000).toISOString() : null
+}
 export type Option = { value: string; label: string }
+/** Danh mục đã xóa (chuẩn hoá nhãn về `label`) — hiển thị trong popup "Danh mục đã xóa" */
+export type DeletedPairView = { id: string; label: string; deleted_at: string; purge_at: string | null }
 
 const plain = <T extends { _id: unknown }>(d: T): PlainDoc => {
   const { _id, ...rest } = d
@@ -51,11 +59,21 @@ export async function getEntityData(def: EntityDef) {
   ])
   const isDeleted = (d: { is_deleted?: boolean }) => d.is_deleted === true
   const docs = all.filter((d) => !isDeleted(d))
-  const deletedItems = all.filter(isDeleted).map(plain)
+  const deletedItems = all.filter(isDeleted).map((d) => ({ ...plain(d), purge_at: purgeAt((d as { deleted_at?: unknown }).deleted_at) }))
   const visibleIds = ((section?.[def.sectionKey] as string[] | undefined) ?? []).filter((id) => docs.some((d) => d._id === id))
   const rank = (id: string) => (visibleIds.includes(id) ? visibleIds.indexOf(id) : Number.MAX_SAFE_INTEGER)
   const items = docs.map(plain).sort((a, b) => rank(a.id) - rank(b.id))
-  return { section, items, visibleIds, optionSources, deletedItems }
+  // Danh mục đã xóa của các trường 'pairs', bỏ mục đã quá hạn 30 ngày
+  const now = new Date().toISOString()
+  const deletedPairs: Record<string, DeletedPairView[]> = {}
+  for (const f of def.sectionFields) {
+    if (f.type !== 'pairs') continue
+    const key = f.pairLabelKey ?? 'label'
+    deletedPairs[f.name] = ((section?.[`deleted_${f.name}`] as Record<string, string>[] | undefined) ?? [])
+      .map((d) => ({ id: d.id, label: d[key] ?? d.id, deleted_at: d.deleted_at, purge_at: purgeAt(d.deleted_at) }))
+      .filter((d) => d.purge_at !== null && d.purge_at > now)
+  }
+  return { section, items, visibleIds, optionSources, deletedItems, deletedPairs }
 }
 
 /** Thư viện ảnh cho ô chọn ảnh: ảnh tải lên từ CMS (mới nhất trước) + ảnh có sẵn trong public/images (thư mục ASCII, bỏ "tư liệu" gốc của khách và thư mục uploads — đã liệt kê qua /uploads/). */
@@ -84,8 +102,14 @@ const row = <T extends { _id: string; created_at: Date }>(d: T) => {
 }
 
 export async function getBookings(): Promise<BookingRow<BookingCustomerDoc>[]> {
-  const docs = await (await col('booking_customer')).find().sort({ created_at: -1 }).limit(1000).toArray()
+  const docs = await (await col('booking_customer')).find(NOT_DELETED).sort({ created_at: -1 }).limit(1000).toArray()
   return docs.map(row)
+}
+
+/** Lịch đặt đã xóa mềm — popup "Đã xóa". */
+export async function getDeletedBookings(): Promise<(BookingRow<BookingCustomerDoc> & { purge_at: string | null })[]> {
+  const docs = await (await col('booking_customer')).find({ is_deleted: true }).sort({ deleted_at: -1 }).limit(1000).toArray()
+  return docs.map((d) => ({ ...row(d), purge_at: purgeAt(d.deleted_at) }))
 }
 
 export async function getStudents(): Promise<BookingRow<CourseStudentDoc>[]> {
@@ -94,9 +118,9 @@ export async function getStudents(): Promise<BookingRow<CourseStudentDoc>[]> {
 }
 
 /** Học viên đã xóa mềm — chỉ để xem trong popup "Đã xóa". */
-export async function getDeletedStudents(): Promise<BookingRow<CourseStudentDoc>[]> {
-  const docs = await (await col('course_student')).find({ is_deleted: true }).sort({ created_at: -1 }).limit(1000).toArray()
-  return docs.map(row)
+export async function getDeletedStudents(): Promise<(BookingRow<CourseStudentDoc> & { purge_at: string | null })[]> {
+  const docs = await (await col('course_student')).find({ is_deleted: true }).sort({ deleted_at: -1 }).limit(1000).toArray()
+  return docs.map((d) => ({ ...row(d), purge_at: purgeAt(d.deleted_at) }))
 }
 
 export type BookingCustomerRow = BookingRow<BookingCustomerDoc>
@@ -111,7 +135,7 @@ export async function getDashboard() {
     getSectionDoc('course_section'),
   ])
   const [newBookings, newStudents, unconfirmedPrices, placeholderWorks] = await Promise.all([
-    bookings.countDocuments({ status: 'new' }),
+    bookings.countDocuments({ status: 'new', ...NOT_DELETED }),
     students.countDocuments({ status: 'new', ...NOT_DELETED }),
     models.countDocuments({ price_confirmed: false, ...NOT_DELETED }),
     achievements.countDocuments({ placeholder: true, ...NOT_DELETED }),

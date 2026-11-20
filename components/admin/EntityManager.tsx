@@ -7,9 +7,11 @@ import { App, Button, Card, Form, Modal, Popconfirm, Switch, Table, Tag, Tooltip
 import type { ContentActions } from '@/app/admin/actions'
 import { entityBySlug, getPath, type FieldDef } from '@/lib/cms/schema'
 import { formatPrice, formatVnd } from '@/lib/format'
-import type { ActionResult, PriceRange } from '@/types/cms'
-import { FieldInput, type OptionSources } from './FieldInput'
+import { PURGE_AFTER_DAYS, type ActionResult, type PriceRange } from '@/types/cms'
+import type { DeletedPairView } from '@/lib/cms/admin-queries'
+import { DragIcon, FieldInput, type OptionSources } from './FieldInput'
 import { useRowReorder } from './useRowReorder'
+import { useUnsavedChanges } from './UnsavedChanges'
 
 type Doc = Record<string, unknown> & { id: string }
 
@@ -17,6 +19,9 @@ type Doc = Record<string, unknown> & { id: string }
 function applyErrors(form: ReturnType<typeof Form.useForm>[0], fields: FieldDef[], errors?: Record<string, string>) {
   form.setFields(fields.map((f) => ({ name: f.name.split('.'), errors: errors?.[f.name] ? [errors[f.name]] : [] })))
 }
+
+const fmtDate = (iso: unknown) =>
+  typeof iso === 'string' ? new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso)) : '—'
 
 function priceText(doc: Doc): string {
   const p = doc.price
@@ -34,6 +39,7 @@ export function EntityManager({
   images,
   actions,
   deletedItems,
+  deletedPairs,
 }: {
   slug: string
   section: Doc | null
@@ -45,6 +51,8 @@ export function EntityManager({
   actions: ContentActions
   /** Mục đã xóa mềm (is_deleted: true) — xem trong popup "Đã xóa" */
   deletedItems: Doc[]
+  /** Danh mục đã xóa của các trường 'pairs' trong phần tiêu đề (theo tên trường) */
+  deletedPairs: Record<string, DeletedPairView[]>
 }) {
   const def = entityBySlug(slug)!
   const router = useRouter()
@@ -54,19 +62,26 @@ export function EntityManager({
   const [itemForm] = Form.useForm()
   const [editing, setEditing] = useState<Doc | 'new' | null>(null)
   const [showDeleted, setShowDeleted] = useState(false)
+  // Thay đổi chưa lưu (form tiêu đề / form sửa item) — để hỏi "có muốn lưu không" khi rời trang
+  const [sectionDirty, setSectionDirty] = useState(false)
+  const [itemDirty, setItemDirty] = useState(false)
 
+  /** Gọi action trong transition; trả về true khi thành công (để popup "Lưu và chuyển" biết có lưu được không). */
   const run = (fn: () => Promise<ActionResult>, ok: string, after?: () => void, onError?: (r: Extract<ActionResult, { ok: false }>) => void) =>
-    startTransition(async () => {
-      const r = await fn()
-      if (r.ok) {
-        message.success(ok)
-        after?.()
-        router.refresh()
-      } else {
-        message.error(r.error)
-        onError?.(r)
-      }
-    })
+    new Promise<boolean>((resolve) =>
+      startTransition(async () => {
+        const r = await fn()
+        if (r.ok) {
+          message.success(ok)
+          after?.()
+          router.refresh()
+        } else {
+          message.error(r.error)
+          onError?.(r)
+        }
+        resolve(r.ok)
+      }),
+    )
 
   const visible = new Set(visibleIds)
   const setOrder = (ids: string[], ok: string) => run(() => actions.setVisibleOrder(ids), ok)
@@ -111,33 +126,45 @@ export function EntityManager({
     return init
   }
 
-  const openEditor = (doc: Doc | 'new') => setEditing(doc)
+  const openEditor = (doc: Doc | 'new') => {
+    setItemDirty(false)
+    setEditing(doc)
+  }
+  const closeEditor = () => {
+    setItemDirty(false)
+    setEditing(null)
+  }
 
-  const submitItem = async () => {
+  const submitItem = async (): Promise<boolean> => {
     try {
       await itemForm.validateFields()
     } catch {
-      return
+      return false
     }
     const values = itemForm.getFieldsValue(true) as Record<string, unknown>
     const id = editing && editing !== 'new' ? editing.id : null
-    run(
+    return run(
       () => actions.saveItem(id, values),
       id ? 'Đã lưu' : full ? `Đã thêm ${def.itemLabel} (đang ẩn vì đã đủ ${max} mục hiển thị)` : `Đã thêm ${def.itemLabel} (hiện ở đầu danh sách)`,
-      () => setEditing(null),
+      closeEditor,
       (r) => applyErrors(itemForm, def.fields, r.errors),
     )
   }
 
-  const submitSection = async () => {
+  const submitSection = async (): Promise<boolean> => {
     try {
       await sectionForm.validateFields()
     } catch {
-      return
+      return false
     }
     const values = sectionForm.getFieldsValue(true) as Record<string, unknown>
-    run(() => actions.saveSection(values), 'Đã lưu phần tiêu đề', undefined, (r) => applyErrors(sectionForm, def.sectionFields, r.errors))
+    return run(() => actions.saveSection(values), 'Đã lưu phần tiêu đề', () => setSectionDirty(false), (r) =>
+      applyErrors(sectionForm, def.sectionFields, r.errors),
+    )
   }
+
+  useUnsavedChanges(sectionDirty, submitSection)
+  useUnsavedChanges(editing !== null && itemDirty, submitItem)
 
   const imgField = def.fields.find((f) => f.type === 'image' || f.type === 'imageNullable')
 
@@ -181,9 +208,16 @@ export function EntityManager({
       {def.note ? <p className="rounded-control border border-line bg-cream-deep px-4 py-3 text-[14px] text-ink">{def.note}</p> : null}
 
       <Card title="Tiêu đề & thông tin chung" size="small">
-        <Form form={sectionForm} layout="vertical" initialValues={section ?? {}} requiredMark="optional" className="max-w-[720px]">
+        <Form
+          form={sectionForm}
+          layout="vertical"
+          initialValues={section ?? {}}
+          requiredMark="optional"
+          className="max-w-[720px]"
+          onValuesChange={() => setSectionDirty(true)}
+        >
           {def.sectionFields.map((f) => (
-            <FieldInput key={f.name} field={f} sources={sources} images={images} />
+            <FieldInput key={f.name} field={f} sources={sources} images={images} deletedPairs={deletedPairs[f.name]} />
           ))}
           <Button type="primary" onClick={submitSection} loading={pending}>
             Lưu
@@ -230,9 +264,7 @@ export function EntityManager({
                     title="Nhấn giữ rồi kéo lên/xuống để đổi thứ tự"
                     {...handleProps(index, (dir) => reorder(index, index + dir))}
                   >
-                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                      <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-                    </svg>
+                    <DragIcon />
                   </button>
                 ) : (
                   <span className="text-[12px] text-ink-soft">Đang ẩn</span>
@@ -255,7 +287,7 @@ export function EntityManager({
                 )
                 // Switch bị khóa không nhận sự kiện chuột → bọc span để Tooltip vẫn hiện
                 return locked ? (
-                  <Tooltip title={fullHint}>
+                  <Tooltip destroyOnHidden title={fullHint}>
                     <span className="inline-block">{sw}</span>
                   </Tooltip>
                 ) : (
@@ -272,8 +304,9 @@ export function EntityManager({
                     Sửa
                   </Button>
                   <Popconfirm
+                    destroyOnHidden
                     title={`Xóa ${def.itemLabel} này?`}
-                    description="Không hoàn tác được. Muốn tạm ẩn thì tắt Hiển thị."
+                    description={`Mục chuyển vào "Đã xóa", khôi phục được trong ${PURGE_AFTER_DAYS} ngày. Muốn tạm ẩn thì tắt Hiển thị.`}
                     okText="Xóa"
                     cancelText="Huỷ"
                     okButtonProps={{ danger: true }}
@@ -293,19 +326,35 @@ export function EntityManager({
 
       <Modal
         open={showDeleted}
+        centered
         title={`${def.label} đã xóa (${deletedItems.length})`}
         onCancel={() => setShowDeleted(false)}
         footer={<Button onClick={() => setShowDeleted(false)}>Đóng</Button>}
-        width={760}
+        width={960}
       >
-        <p className="mb-3 text-[13px] text-ink-soft">Các mục đã bấm Xóa (is_deleted: true). Vẫn còn trong cơ sở dữ liệu nhưng không hiện trên website và CMS.</p>
+        <p className="mb-3 text-[13px] text-ink-soft">
+          Các mục đã bấm Xóa. Khôi phục được trong {PURGE_AFTER_DAYS} ngày kể từ lúc xóa; quá hạn sẽ bị xóa vĩnh viễn. Mục khôi phục quay về danh sách ở trạng thái ẩn.
+        </p>
         <Table<Doc>
           rowKey="id"
           size="small"
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
-          scroll={{ x: 560 }}
+          scroll={{ x: 820 }}
           dataSource={deletedItems}
-          columns={infoColumns}
+          loading={pending}
+          columns={[
+            ...infoColumns,
+            { title: 'Xóa vĩnh viễn lúc', width: 150, render: (_, d) => <span className="tabular-nums">{fmtDate(d.purge_at)}</span> },
+            {
+              title: '',
+              width: 110,
+              render: (_, d) => (
+                <Button size="small" onClick={() => run(() => actions.restoreItem(d.id), `Đã khôi phục (đang ẩn — bật Hiển thị nếu muốn đưa lên trang chủ)`)}>
+                  Khôi phục
+                </Button>
+              ),
+            },
+          ]}
           locale={{ emptyText: 'Chưa có mục nào bị xóa' }}
         />
       </Modal>
@@ -313,13 +362,17 @@ export function EntityManager({
       <Modal
         open={editing !== null}
         title={editing === 'new' ? `Thêm ${def.itemLabel}` : `Sửa ${def.itemLabel}`}
-        onCancel={() => setEditing(null)}
+        onCancel={closeEditor}
         onOk={submitItem}
         okText="Lưu"
         cancelText="Huỷ"
         confirmLoading={pending}
         destroyOnHidden
+        centered
         width={720}
+        // Form dài (vd. Dịch vụ, Khóa học): chỉ phần thân cuộn dọc, tiêu đề + nút Lưu/Huỷ luôn hiện.
+        // 220px ≈ tiêu đề + chân + đệm của modal; lề phải âm để thanh cuộn nằm sát mép, không ép ô nhập.
+        styles={{ body: { maxHeight: 'calc(100dvh - 220px)', overflowY: 'auto', overscrollBehavior: 'contain', paddingRight: 12, marginRight: -12 } }}
       >
         <Form
           form={itemForm}
@@ -327,6 +380,7 @@ export function EntityManager({
           requiredMark="optional"
           preserve={false}
           initialValues={editing === null ? undefined : itemInitialValues(editing)}
+          onValuesChange={() => setItemDirty(true)}
         >
           {def.fields.map((f) => (
             <FieldInput key={f.name} field={f} sources={sources} images={images} />

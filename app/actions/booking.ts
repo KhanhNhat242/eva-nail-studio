@@ -69,7 +69,7 @@ export async function submitBooking(_prev: BookingState, formData: FormData): Pr
   try {
     const base = { _id: randomUUID(), name, phone_number: phone, note: note || null, status: 'new' as const, created_at: new Date() }
     if (mode === 'beauty') {
-      await (await col('booking_customer')).insertOne({ ...base, service: choice, service_label: choiceLabel ?? choice, date, time })
+      await (await col('booking_customer')).insertOne({ ...base, service: choice, service_label: choiceLabel ?? choice, date, time, is_deleted: false })
     } else {
       await (await col('course_student')).insertOne({ ...base, course_name: choice, course_label: choiceLabel ?? choice, session: time || null, is_deleted: false })
     }

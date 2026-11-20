@@ -95,14 +95,20 @@
   }
 
   /* Dòng đang được kéo: nổi lên trên các dòng khác */
-  .ant-table-row[data-dragging] {
+  .ant-table-row[data-dragging],
+  [data-reorder-row][data-dragging] {
     position: relative;
     z-index: 2;
     box-shadow: 0 12px 28px -12px rgb(20 20 20 / 0.28);
   }
 
-  .ant-table-row[data-dragging] > td {
+  .ant-table-row[data-dragging] > td,
+  [data-reorder-row][data-dragging] {
     background: var(--color-cream) !important;
+  }
+
+  [data-reorder-row][data-dragging] {
+    border-radius: var(--radius-control);
   }
 }
 

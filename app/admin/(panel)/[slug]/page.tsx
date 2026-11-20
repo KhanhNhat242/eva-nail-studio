@@ -31,14 +31,14 @@ async function EntityContent({ params }: { params: PageProps<'/admin/[slug]'>['p
   const def = entityBySlug((await params).slug)
   const actions = def && contentActions[def.slug]
   if (!def || !actions) notFound()
-  const [{ section, items, visibleIds, optionSources, deletedItems }, images] = await Promise.all([getEntityData(def), listImages()])
+  const [{ section, items, visibleIds, optionSources, deletedItems, deletedPairs }, images] = await Promise.all([getEntityData(def), listImages()])
   return (
     <>
       <PageHeader
         title={def.label}
         description="Bật Hiển thị để đưa lên trang chủ; mũi tên đổi thứ tự. Lưu xong trang chủ cập nhật ngay."
       />
-      <EntityManager slug={def.slug} section={section} items={items} visibleIds={visibleIds} sources={optionSources} images={images} actions={actions} deletedItems={deletedItems} />
+      <EntityManager slug={def.slug} section={section} items={items} visibleIds={visibleIds} sources={optionSources} images={images} actions={actions} deletedItems={deletedItems} deletedPairs={deletedPairs} />
     </>
   )
 }

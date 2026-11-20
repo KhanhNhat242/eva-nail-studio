@@ -1,8 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { Button, Form, Input, InputNumber, Select, Switch } from 'antd'
+import type { FormListFieldData, FormListOperation } from 'antd'
+import { useState } from 'react'
+import { App, Button, Form, Input, InputNumber, Modal, Select, Switch, Table } from 'antd'
+import type { DeletedPairView } from '@/lib/cms/admin-queries'
 import type { FieldDef, OptionSource } from '@/lib/cms/schema'
+import { PURGE_AFTER_DAYS } from '@/types/cms'
+import { useRowReorder } from './useRowReorder'
 
 export type Option = { value: string; label: string }
 export type OptionSources = Record<OptionSource, Option[]>
@@ -90,13 +95,134 @@ export function ImagePicker({ value, onChange, images, allowEmpty }: { value?: s
   )
 }
 
+/** Icon ≡ của nút kéo — giống cột "Thứ tự" trong bảng (EntityManager) */
+export function DragIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+    </svg>
+  )
+}
+
+/** Danh sách danh mục (bảng giá / nhóm mẫu): kéo nút ≡ để đổi thứ tự, giống bảng bên dưới; phím ↑/↓ trên nút kéo cũng được. */
+const fmtDateTime = (iso: string | null) =>
+  iso ? new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso)) : '—'
+
+function SortablePairs({
+  name,
+  rows,
+  ops,
+  labelKey,
+  deleted,
+}: {
+  name: string[]
+  rows: FormListFieldData[]
+  ops: FormListOperation
+  labelKey: string
+  deleted?: DeletedPairView[]
+}) {
+  const { containerRef, handleProps } = useRowReorder({ count: rows.length, onReorder: ops.move, rowSelector: '[data-reorder-row]' })
+  const { message } = App.useApp()
+  const [showDeleted, setShowDeleted] = useState(false)
+  // Danh mục đã khôi phục vào form (chưa Lưu) thì không hiện trong danh sách đã xóa nữa
+  const current = Form.useWatch(name, Form.useFormInstance()) as { id?: string }[] | undefined
+  const currentIds = new Set((current ?? []).map((p) => p?.id))
+  const restorable = (deleted ?? []).filter((d) => !currentIds.has(d.id))
+  const restore = (d: DeletedPairView) => {
+    ops.add({ id: d.id, [labelKey]: d.label })
+    message.success(`Đã đưa "${d.label}" trở lại danh sách. Bấm Lưu để áp dụng.`)
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <div ref={containerRef} className="flex flex-col gap-2">
+        {rows.map((row, i) => (
+          <div key={row.key} data-reorder-row className="flex items-center gap-2">
+            <button
+              type="button"
+              className="drag-handle shrink-0"
+              disabled={rows.length < 2}
+              aria-label={`Kéo để đổi thứ tự danh mục ${i + 1} (hoặc dùng phím mũi tên lên/xuống)`}
+              title="Nhấn giữ rồi kéo lên/xuống để đổi thứ tự"
+              {...handleProps(i, (dir) => ops.move(i, i + dir))}
+            >
+              <DragIcon />
+            </button>
+            <Form.Item name={[row.name, labelKey]} noStyle rules={[{ required: true, message: 'Nhập tên' }]}>
+              <Input placeholder="Tên danh mục" />
+            </Form.Item>
+            <Button aria-label="Xóa danh mục" danger onClick={() => ops.remove(row.name)}>
+              Xóa
+            </Button>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button type="dashed" className="flex-1" onClick={() => ops.add({ [labelKey]: '' })}>
+          Thêm danh mục
+        </Button>
+        {deleted ? <Button onClick={() => setShowDeleted(true)}>Danh mục đã xóa ({restorable.length})</Button> : null}
+      </div>
+      {deleted ? (
+        <Modal
+          open={showDeleted}
+          centered
+          destroyOnHidden
+          title={`Danh mục đã xóa (${restorable.length})`}
+          onCancel={() => setShowDeleted(false)}
+          footer={<Button onClick={() => setShowDeleted(false)}>Đóng</Button>}
+          width={760}
+        >
+          <p className="mb-3 text-[13px] text-ink-soft">
+            Danh mục đã bỏ khỏi danh sách (tính từ lúc bấm Lưu). Khôi phục được trong {PURGE_AFTER_DAYS} ngày; quá hạn sẽ bị xóa vĩnh viễn. Khôi phục đưa danh mục về
+            cuối danh sách với mã cũ, bấm Lưu để áp dụng.
+          </p>
+          <Table<DeletedPairView>
+            rowKey="id"
+            size="small"
+            pagination={{ pageSize: 10, hideOnSinglePage: true }}
+            dataSource={restorable}
+            locale={{ emptyText: 'Chưa có danh mục nào bị xóa' }}
+            columns={[
+              { title: 'Tên danh mục', dataIndex: 'label' },
+              { title: 'Xóa lúc', width: 150, render: (_, d) => <span className="tabular-nums">{fmtDateTime(d.deleted_at)}</span> },
+              { title: 'Xóa vĩnh viễn lúc', width: 150, render: (_, d) => <span className="tabular-nums">{fmtDateTime(d.purge_at)}</span> },
+              {
+                title: '',
+                width: 110,
+                render: (_, d) => (
+                  <Button size="small" onClick={() => restore(d)}>
+                    Khôi phục
+                  </Button>
+                ),
+              },
+            ]}
+          />
+        </Modal>
+      ) : null}
+    </div>
+  )
+}
+
 /** Một dòng / một mục: textarea, lưu thành mảng chuỗi */
 const listProps = {
   getValueProps: (v: unknown) => ({ value: Array.isArray(v) ? v.join('\n') : '' }),
   normalize: (v: string) => v.split('\n'),
 }
 
-export function FieldInput({ field, sources, images, serverError }: { field: FieldDef; sources: OptionSources; images: string[]; serverError?: string }) {
+export function FieldInput({
+  field,
+  sources,
+  images,
+  serverError,
+  deletedPairs,
+}: {
+  field: FieldDef
+  sources: OptionSources
+  images: string[]
+  serverError?: string
+  /** Trường 'pairs': danh mục đã xóa để khôi phục */
+  deletedPairs?: DeletedPairView[]
+}) {
   const name = field.name.split('.')
   const common = {
     name,
@@ -169,31 +295,7 @@ export function FieldInput({ field, sources, images, serverError }: { field: Fie
       const key = field.pairLabelKey ?? 'label'
       return (
         <Form.Item label={field.label} extra={field.help} validateStatus={serverError ? 'error' : undefined} help={serverError}>
-          <Form.List name={name}>
-            {(rows, { add, remove, move }) => (
-              <div className="flex flex-col gap-2">
-                {rows.map((row, i) => (
-                  <div key={row.key} className="flex items-center gap-2">
-                    <Form.Item name={[row.name, key]} noStyle rules={[{ required: true, message: 'Nhập tên' }]}>
-                      <Input placeholder="Tên danh mục" />
-                    </Form.Item>
-                    <Button aria-label="Lên" disabled={i === 0} onClick={() => move(i, i - 1)}>
-                      ↑
-                    </Button>
-                    <Button aria-label="Xuống" disabled={i === rows.length - 1} onClick={() => move(i, i + 1)}>
-                      ↓
-                    </Button>
-                    <Button aria-label="Xóa danh mục" danger onClick={() => remove(row.name)}>
-                      Xóa
-                    </Button>
-                  </div>
-                ))}
-                <Button type="dashed" onClick={() => add({ [key]: '' })}>
-                  Thêm danh mục
-                </Button>
-              </div>
-            )}
-          </Form.List>
+          <Form.List name={name}>{(rows, ops) => <SortablePairs name={name} rows={rows} ops={ops} labelKey={key} deleted={deletedPairs} />}</Form.List>
         </Form.Item>
       )
     }

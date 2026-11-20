@@ -10,11 +10,12 @@ import * as viSao from './vi-sao'
 /**
  * Bảng tra slug trang admin → bộ Server Action của khối nội dung đó.
  * Trang `/admin/[slug]` (server) lấy bộ action ở đây rồi truyền xuống `EntityManager` (client) qua props.
- * Thêm khối nội dung mới: tạo `app/admin/actions/<slug>.ts` (4 hàm như dưới) + thêm 1 dòng vào đây.
+ * Thêm khối nội dung mới: tạo `app/admin/actions/<slug>.ts` (5 hàm như dưới) + thêm 1 dòng vào đây.
  */
 export type ContentActions = {
   saveItem: (id: string | null, input: Record<string, unknown>) => Promise<ActionResult>
   deleteItem: (id: string) => Promise<ActionResult>
+  restoreItem: (id: string) => Promise<ActionResult>
   setVisibleOrder: (ids: string[]) => Promise<ActionResult>
   saveSection: (input: Record<string, unknown>) => Promise<ActionResult>
 }
@@ -23,6 +24,7 @@ export type ContentActions = {
 const pick = (m: ContentActions): ContentActions => ({
   saveItem: m.saveItem,
   deleteItem: m.deleteItem,
+  restoreItem: m.restoreItem,
   setVisibleOrder: m.setVisibleOrder,
   saveSection: m.saveSection,
 })
@@ -41,4 +43,6 @@ export const contentActions: Record<string, ContentActions> = {
 export type RecordActions = {
   setStatus: (id: string, status: string) => Promise<ActionResult>
   remove: (id: string) => Promise<ActionResult>
+  /** Có khi bản ghi xóa mềm (Đăng ký học) */
+  restore?: (id: string) => Promise<ActionResult>
 }

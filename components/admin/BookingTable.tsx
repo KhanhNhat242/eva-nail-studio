@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { App, Button, Modal, Popconfirm, Segmented, Select, Table, type TableColumnsType } from 'antd'
 import type { RecordActions } from '@/app/admin/actions'
 import type { ActionResult } from '@/types/cms'
-import { BOOKING_STATUSES, bookingStatusLabel, type BookingStatus } from '@/types/cms'
+import { BOOKING_STATUSES, PURGE_AFTER_DAYS, bookingStatusLabel, type BookingStatus } from '@/types/cms'
 
 export type BookingRowView = {
   id: string
@@ -30,8 +30,8 @@ export function BookingTable({
 }: {
   actions: RecordActions
   rows: BookingRowView[]
-  /** Bản ghi đã xóa mềm — có thì hiện nút "Đã xóa" (chỉ trang Đăng ký học; Lịch đặt vẫn xóa hẳn) */
-  deletedRows?: BookingRowView[]
+  /** Bản ghi đã xóa mềm — có thì hiện nút "Đã xóa" (Lịch đặt và Đăng ký học) */
+  deletedRows?: (BookingRowView & { purge_at: string | null })[]
   choiceTitle: string
   whenTitle: string
 }) {
@@ -114,7 +114,7 @@ export function BookingTable({
             title: '',
             width: 80,
             render: (_, r) => (
-              <Popconfirm title="Xóa bản ghi này?" okText="Xóa" cancelText="Huỷ" okButtonProps={{ danger: true }} onConfirm={() => run(() => actions.remove(r.id), 'Đã xóa')}>
+              <Popconfirm destroyOnHidden title="Xóa bản ghi này?" description={`Bản ghi chuyển vào "Đã xóa", khôi phục được trong ${PURGE_AFTER_DAYS} ngày.`} okText="Xóa" cancelText="Huỷ" okButtonProps={{ danger: true }} onConfirm={() => run(() => actions.remove(r.id), 'Đã xóa')}>
                 <Button size="small" danger>
                   Xóa
                 </Button>
@@ -127,20 +127,41 @@ export function BookingTable({
       {deletedRows ? (
         <Modal
           open={showDeleted}
+          centered
           title={`Bản ghi đã xóa (${deletedRows.length})`}
           onCancel={() => setShowDeleted(false)}
           footer={<Button onClick={() => setShowDeleted(false)}>Đóng</Button>}
-          width={960}
+          width={1200}
         >
-          <p className="mb-3 text-[13px] text-ink-soft">Các bản ghi đã bấm Xóa (is_deleted: true). Vẫn còn trong cơ sở dữ liệu nhưng không hiện trong danh sách.</p>
-          <Table<BookingRowView>
+          <p className="mb-3 text-[13px] text-ink-soft">
+            Các bản ghi đã bấm Xóa. Khôi phục được trong {PURGE_AFTER_DAYS} ngày kể từ lúc xóa; quá hạn sẽ bị xóa vĩnh viễn.
+          </p>
+          <Table<BookingRowView & { purge_at: string | null }>
             rowKey="id"
             size="small"
             dataSource={deletedRows}
-            scroll={{ x: 820 }}
+            scroll={{ x: 1120 }}
             pagination={{ pageSize: 10, hideOnSinglePage: true }}
             locale={{ emptyText: 'Chưa có bản ghi nào bị xóa' }}
-            columns={[...infoColumns, { title: 'Trạng thái', width: 120, render: (_, r) => bookingStatusLabel[r.status] }]}
+            loading={pending}
+            columns={[
+              ...(infoColumns as TableColumnsType<BookingRowView & { purge_at: string | null }>),
+              { title: 'Trạng thái', width: 120, render: (_, r) => bookingStatusLabel[r.status] },
+              { title: 'Xóa vĩnh viễn lúc', width: 140, render: (_, r) => (r.purge_at ? fmtCreated(r.purge_at) : '—') },
+              ...(actions.restore
+                ? [
+                    {
+                      title: '',
+                      width: 110,
+                      render: (_: unknown, r: BookingRowView) => (
+                        <Button size="small" onClick={() => run(() => actions.restore!(r.id), 'Đã khôi phục')}>
+                          Khôi phục
+                        </Button>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
           />
         </Modal>
       ) : null}

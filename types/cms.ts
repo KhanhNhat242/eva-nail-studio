@@ -11,9 +11,13 @@ export const SECTION_ID = 'main'
 
 /**
  * Xóa mềm: bấm "Xóa" trong CMS chỉ đặt `is_deleted: true` (bản ghi vẫn còn trong DB), mặc định `false`.
- * Áp dụng cho các collection danh sách nội dung + `course_student`. Mọi truy vấn đọc phải lọc bằng NOT_DELETED (lib/db/mongo.ts).
+ * Áp dụng cho các collection danh sách nội dung + `course_student` + `booking_customer`. Mọi truy vấn đọc phải lọc bằng NOT_DELETED (lib/db/mongo.ts).
  */
-export type SoftDelete = { is_deleted: boolean }
+export type SoftDelete = { is_deleted: boolean; /** Lúc xóa mềm — TTL index tự xóa cứng sau PURGE_AFTER_DAYS ngày */ deleted_at?: Date }
+
+/** Bản ghi đã xóa mềm được giữ bao nhiêu ngày trước khi MongoDB tự xóa vĩnh viễn (TTL index, lib/db/mongo.ts). */
+export const PURGE_AFTER_DAYS = 30
+export const SOFT_DELETE_COLLECTIONS = ['service', 'combo', 'price', 'model', 'course', 'achievement', 'whyus', 'course_student', 'booking_customer'] as const
 
 /** Kết quả trả về của mọi Server Action trong /admin (dùng được cả ở client). */
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string; errors?: Record<string, string> }
@@ -50,7 +54,9 @@ export type PriceDoc = SoftDelete & {
   unit: string | null
   note: string | null
 }
-export type PriceListDoc = { _id: string; categories: { id: string; name: string }[]; price: string[] }
+/** Danh mục đã bỏ khỏi section (lưu lúc bấm Lưu), khôi phục được trong PURGE_AFTER_DAYS ngày — `deleted_<tên trường pairs>` */
+export type DeletedPair<K extends string> = { id: string; deleted_at: Date } & Record<K, string>
+export type PriceListDoc = { _id: string; categories: { id: string; name: string }[]; deleted_categories?: DeletedPair<'name'>[]; price: string[] }
 
 export type ModelDoc = SoftDelete & {
   _id: string
@@ -65,7 +71,7 @@ export type ModelDoc = SoftDelete & {
   img_width: number
   img_height: number
 }
-export type ModelSectionDoc = { _id: string; title: string; categories: { id: string; label: string }[]; model: string[] }
+export type ModelSectionDoc = { _id: string; title: string; categories: { id: string; label: string }[]; deleted_categories?: DeletedPair<'label'>[]; model: string[] }
 
 export type CourseDoc = SoftDelete & {
   _id: string
@@ -113,7 +119,7 @@ export const bookingStatusLabel: Record<BookingStatus, string> = {
   cancelled: 'Đã huỷ',
 }
 
-export type BookingCustomerDoc = {
+export type BookingCustomerDoc = SoftDelete & {
   _id: string
   name: string
   phone_number: string

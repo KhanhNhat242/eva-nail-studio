@@ -11,6 +11,8 @@ type DragState = {
   rows: HTMLElement[]
   tops: number[]
   heights: number[]
+  /** Khoảng hở giữa 2 dòng liền nhau (bảng = 0; danh sách flex có gap > 0) */
+  gap: number
   minDy: number
   maxDy: number
 }
@@ -18,12 +20,21 @@ type DragState = {
 const DURATION = 200
 
 /**
- * Kéo-thả đổi thứ tự các dòng đầu (`count` dòng đang hiển thị) của một antd Table — không dùng thư viện.
+ * Kéo-thả đổi thứ tự `count` dòng đầu trong `containerRef` — không dùng thư viện.
+ * Mặc định là dòng của antd Table; danh sách khác truyền `rowSelector` (vd. danh mục trong form section).
  * Nhấn giữ nút kéo → dòng đi theo con trỏ, các dòng khác trượt nhường chỗ; thả → dòng trượt vào chỗ mới
  * rồi `onReorder(from, to)` được gọi (đồng bộ, trước khi gỡ hiệu ứng để không bị giật).
  * Bàn phím: mũi tên lên/xuống trên nút kéo.
  */
-export function useRowReorder({ count, onReorder }: { count: number; onReorder: (from: number, to: number) => void }) {
+export function useRowReorder({
+  count,
+  onReorder,
+  rowSelector = 'tbody tr.ant-table-row',
+}: {
+  count: number
+  onReorder: (from: number, to: number) => void
+  rowSelector?: string
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const drag = useRef<DragState | null>(null)
 
@@ -31,7 +42,7 @@ export function useRowReorder({ count, onReorder }: { count: number; onReorder: 
 
   function onPointerDown(e: PointerEvent<HTMLElement>, index: number) {
     if (e.button !== 0 || drag.current || index >= count) return
-    const rows = Array.from(containerRef.current?.querySelectorAll<HTMLElement>('tbody tr.ant-table-row') ?? []).slice(0, count)
+    const rows = Array.from(containerRef.current?.querySelectorAll<HTMLElement>(rowSelector) ?? []).slice(0, count)
     if (!rows[index]) return
     e.preventDefault()
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -47,6 +58,7 @@ export function useRowReorder({ count, onReorder }: { count: number; onReorder: 
       rows,
       tops,
       heights,
+      gap: rows.length > 1 ? Math.max(0, tops[1] - (tops[0] + heights[0])) : 0,
       minDy: tops[0] - tops[index],
       maxDy: tops[count - 1] + heights[count - 1] - (tops[index] + heights[index]),
     }
@@ -71,7 +83,7 @@ export function useRowReorder({ count, onReorder }: { count: number; onReorder: 
     for (let i = d.from - 1; i >= 0; i--) if (center < d.tops[i] + d.heights[i] / 2) to = i
     d.to = to
 
-    const h = d.heights[d.from]
+    const h = d.heights[d.from] + d.gap
     d.rows.forEach((r, i) => {
       if (i === d.from) return
       const shift = d.from < i && i <= to ? -h : to <= i && i < d.from ? h : 0
@@ -82,11 +94,11 @@ export function useRowReorder({ count, onReorder }: { count: number; onReorder: 
   function finish(e: PointerEvent<HTMLElement>, cancelled: boolean) {
     const d = drag.current
     if (!d || e.pointerId !== d.pointerId) return
-    const { from, rows, heights } = d
+    const { from, rows, heights, gap } = d
     const to = cancelled ? from : d.to
     let offset = 0
-    if (to > from) for (let i = from + 1; i <= to; i++) offset += heights[i]
-    else for (let i = to; i < from; i++) offset -= heights[i]
+    if (to > from) for (let i = from + 1; i <= to; i++) offset += heights[i] + gap
+    else for (let i = to; i < from; i++) offset -= heights[i] + gap
 
     const ms = duration()
     const el = rows[from]

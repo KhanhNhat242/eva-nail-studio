@@ -3,7 +3,7 @@ import { updateTag } from 'next/cache'
 import { NOT_DELETED, col } from '@/lib/db/mongo'
 import { getOptionSources } from '@/lib/cms/admin-queries'
 import { entityByCollection, slugify, validateFields, type ContentCollection, type EntityDef } from '@/lib/cms/schema'
-import { BOOKING_STATUSES, SECTION_ID, type ActionResult, type BookingStatus, type CollectionName } from '@/types/cms'
+import { BOOKING_STATUSES, PURGE_AFTER_DAYS, SECTION_ID, type ActionResult, type BookingStatus, type CollectionName } from '@/types/cms'
 
 /**
  * Thao tác ghi MongoDB dùng chung cho các Server Action trong `app/admin/actions/*`.
@@ -88,10 +88,19 @@ export async function saveEntityItem(collection: ContentCollection, id: string |
 /** Xóa mềm: đặt is_deleted = true (bản ghi vẫn còn trong DB) và gỡ khỏi danh sách hiển thị của section. */
 export async function deleteEntityItem(collection: ContentCollection, id: string): Promise<ActionResult> {
   const def = getDef(collection)
-  const r = await (await col(def.collection)).updateOne({ _id: id, ...NOT_DELETED } as never, { $set: { is_deleted: true } } as never)
+  const r = await (await col(def.collection)).updateOne({ _id: id, ...NOT_DELETED } as never, { $set: { is_deleted: true, deleted_at: new Date() } } as never)
   if (!r.matchedCount) return fail('Không tìm thấy mục này (có thể đã bị xóa).')
   await (await col(def.section)).updateOne({ _id: SECTION_ID } as never, { $pull: { [def.sectionKey]: id } } as never)
   invalidate(def.collection, def.section)
+  return { ok: true }
+}
+
+/** Khôi phục item đã xóa mềm: về danh sách ở trạng thái ẩn (không tự hiện lại trên trang chủ), bỏ hẹn xóa vĩnh viễn. */
+export async function restoreEntityItem(collection: ContentCollection, id: string): Promise<ActionResult> {
+  const def = getDef(collection)
+  const r = await (await col(def.collection)).updateOne({ _id: id, is_deleted: true } as never, { $set: { is_deleted: false }, $unset: { deleted_at: '' } } as never)
+  if (!r.matchedCount) return fail('Không tìm thấy mục này (có thể đã bị xóa vĩnh viễn).')
+  invalidate(def.collection)
   return { ok: true }
 }
 
@@ -117,9 +126,36 @@ export async function saveEntitySection(collection: ContentCollection, input: Do
   const ruleError = await rule?.(v.value)
   if (ruleError) return ruleError
 
-  await (await col(def.section)).updateOne({ _id: SECTION_ID } as never, { $set: v.value } as never, { upsert: true })
+  const sections = await col(def.section)
+  const prev = (await sections.findOne({ _id: SECTION_ID } as never)) as Doc | null
+  trackDeletedPairs(def, prev, v.value)
+  await sections.updateOne({ _id: SECTION_ID } as never, { $set: v.value } as never, { upsert: true })
   invalidate(def.section)
   return { ok: true }
+}
+
+type Pair = { id: string } & Record<string, unknown>
+
+/**
+ * Trường kiểu 'pairs' (danh mục bảng giá / nhóm mẫu): danh mục bị bỏ khỏi danh sách khi Lưu được giữ lại ở
+ * `deleted_<tên trường>` kèm `deleted_at` để khôi phục (giữ nguyên id → item đang gắn danh mục không bị lệch).
+ * Danh mục được thêm lại (cùng id) thì gỡ khỏi danh sách đã xóa; quá PURGE_AFTER_DAYS ngày thì bỏ hẳn
+ * (mảng trong document không dùng được TTL index nên dọn mỗi lần lưu; trang admin cũng lọc khi hiển thị).
+ */
+function trackDeletedPairs(def: EntityDef, prev: Doc | null, next: Doc) {
+  const now = new Date()
+  const cutoff = now.getTime() - PURGE_AFTER_DAYS * 86_400_000
+  for (const f of def.sectionFields) {
+    if (f.type !== 'pairs') continue
+    const nextIds = new Set(((next[f.name] as Pair[] | undefined) ?? []).map((p) => p.id))
+    const kept = ((prev?.[`deleted_${f.name}`] as (Pair & { deleted_at: Date | string })[] | undefined) ?? []).filter(
+      (d) => !nextIds.has(d.id) && new Date(d.deleted_at).getTime() > cutoff,
+    )
+    const removed = ((prev?.[f.name] as Pair[] | undefined) ?? [])
+      .filter((p) => !nextIds.has(p.id) && !kept.some((d) => d.id === p.id))
+      .map((p) => ({ ...p, deleted_at: now }))
+    next[`deleted_${f.name}`] = [...removed, ...kept]
+  }
 }
 
 /** Danh mục (bảng giá / nhóm mẫu) đang được item (chưa xóa mềm) dùng thì không được xóa khỏi section. */
@@ -142,14 +178,14 @@ export async function setRecordStatus(collection: BookingCollection, id: string,
   return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi.')
 }
 
-/** Xóa hẳn khỏi DB — chỉ dùng cho `booking_customer` (chưa có yêu cầu xóa mềm). */
-export async function deleteRecord(collection: BookingCollection, id: string): Promise<ActionResult> {
-  await (await col(collection)).deleteOne({ _id: id })
-  return { ok: true }
+/** Xóa mềm lịch đặt / học viên đăng ký: is_deleted = true + deleted_at (TTL tự xóa vĩnh viễn sau PURGE_AFTER_DAYS ngày). */
+export async function softDeleteRecord(collection: BookingCollection, id: string): Promise<ActionResult> {
+  const r = await (await col(collection)).updateOne({ _id: id, ...NOT_DELETED } as never, { $set: { is_deleted: true, deleted_at: new Date() } } as never)
+  return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi.')
 }
 
-/** Xóa mềm học viên đăng ký: đặt is_deleted = true. */
-export async function softDeleteStudent(id: string): Promise<ActionResult> {
-  const r = await (await col('course_student')).updateOne({ _id: id, ...NOT_DELETED }, { $set: { is_deleted: true } })
-  return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi.')
+/** Khôi phục lịch đặt / học viên đã xóa mềm. */
+export async function restoreRecord(collection: BookingCollection, id: string): Promise<ActionResult> {
+  const r = await (await col(collection)).updateOne({ _id: id, is_deleted: true } as never, { $set: { is_deleted: false }, $unset: { deleted_at: '' } } as never)
+  return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi (có thể đã bị xóa vĩnh viễn).')
 }

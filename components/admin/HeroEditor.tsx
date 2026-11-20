@@ -6,6 +6,7 @@ import { useRef, useState, useTransition } from 'react'
 import { App, Button, Card, Input, Popconfirm, Select, Tooltip } from 'antd'
 import { deleteImage, saveHeroGrid, uploadImage } from '@/app/admin/actions/hero'
 import { ImagePicker } from './FieldInput'
+import { useUnsavedChanges } from './UnsavedChanges'
 
 type Slot = { img: string; img_alt: string; img_position: string }
 type Upload = { src: string; usedIn: string[] }
@@ -44,7 +45,30 @@ export function HeroEditor({ initial, images, uploads }: { initial: Record<strin
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const targetSlot = useRef<string | null>(null)
-  const set = (k: string, patch: Partial<Slot>) => setSlots((s) => ({ ...s, [k]: { ...s[k], ...patch } }))
+  /** Có thay đổi chưa bấm "Lưu ảnh Hero" (kể cả ảnh vừa tải lên gán vào ô) */
+  const [dirty, setDirty] = useState(false)
+  const set = (k: string, patch: Partial<Slot>) => {
+    setDirty(true)
+    setSlots((s) => ({ ...s, [k]: { ...s[k], ...patch } }))
+  }
+
+  const save = () =>
+    new Promise<boolean>((resolve) =>
+      start(async () => {
+        const r = await saveHeroGrid(slots)
+        if (r.ok) {
+          setErrors({})
+          setDirty(false)
+          message.success('Đã lưu ảnh Hero')
+          router.refresh()
+        } else {
+          setErrors(r.errors ?? {})
+          message.error(r.error)
+        }
+        resolve(r.ok)
+      }),
+    )
+  useUnsavedChanges(dirty, save)
 
   const pickFile = (slot: string) => {
     targetSlot.current = slot
@@ -120,19 +144,7 @@ export function HeroEditor({ initial, images, uploads }: { initial: Record<strin
           size="large"
           loading={pending && uploadingSlot === null}
           disabled={uploadingSlot !== null}
-          onClick={() =>
-            start(async () => {
-              const r = await saveHeroGrid(slots)
-              if (r.ok) {
-                setErrors({})
-                message.success('Đã lưu ảnh Hero')
-                router.refresh()
-              } else {
-                setErrors(r.errors ?? {})
-                message.error(r.error)
-              }
-            })
-          }
+          onClick={save}
         >
           Lưu ảnh Hero
         </Button>
@@ -162,11 +174,12 @@ export function HeroEditor({ initial, images, uploads }: { initial: Record<strin
                     {used.length ? `Đang dùng: ${used.join(', ')}` : 'Chưa dùng'}
                   </p>
                   {used.length ? (
-                    <Tooltip title="Đổi các nơi đang dùng sang ảnh khác trước khi xóa">
+                    <Tooltip destroyOnHidden title="Đổi các nơi đang dùng sang ảnh khác trước khi xóa">
                       <span className="block">{del}</span>
                     </Tooltip>
                   ) : (
                     <Popconfirm
+                      destroyOnHidden
                       title="Xóa ảnh này?"
                       description="File bị xóa khỏi máy chủ, không hoàn tác được."
                       okText="Xóa"
