@@ -81,10 +81,10 @@ export function ImagePicker({ value, onChange, images, allowEmpty }: { value?: s
         className="min-w-0 flex-1"
         showSearch={{ optionFilterProp: 'label' }}
         allowClear={allowEmpty}
-        placeholder="Chọn ảnh trong /public/images"
+        placeholder="Chọn ảnh trong thư viện"
         value={value || undefined}
         onChange={(v) => onChange?.(v ?? null)}
-        options={images.map((src) => ({ value: src, label: src.replace('/images/', '') }))}
+        options={images.map((src) => ({ value: src, label: src.startsWith('/uploads/') ? `Tải lên · ${src.slice(9)}` : src.replace('/images/', '') }))}
       />
     </div>
   )

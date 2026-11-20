@@ -1,6 +1,6 @@
 import 'server-only'
 import { updateTag } from 'next/cache'
-import { col } from '@/lib/db/mongo'
+import { NOT_DELETED, col } from '@/lib/db/mongo'
 import { getOptionSources } from '@/lib/cms/admin-queries'
 import { entityByCollection, slugify, validateFields, type ContentCollection, type EntityDef } from '@/lib/cms/schema'
 import { BOOKING_STATUSES, SECTION_ID, type ActionResult, type BookingStatus, type CollectionName } from '@/types/cms'
@@ -41,7 +41,15 @@ function allowedOptions(src: OptionSources) {
 
 // ---------------- Nội dung (item + section) ----------------
 
-/** Thêm (id = null) hoặc sửa một item. Item mới được thêm vào đầu danh sách hiển thị. */
+/** Số mục đang hiển thị của section (chỉ đếm id còn tồn tại, chưa xóa mềm). */
+async function countVisible(def: EntityDef): Promise<number> {
+  const sec = (await (await col(def.section)).findOne({ _id: SECTION_ID } as never)) as Doc | null
+  const ids = (sec?.[def.sectionKey] as string[] | undefined) ?? []
+  if (!ids.length) return 0
+  return (await col(def.collection)).countDocuments({ _id: { $in: ids }, ...NOT_DELETED } as never)
+}
+
+/** Thêm (id = null) hoặc sửa một item. Item mới được thêm vào đầu danh sách hiển thị (hoặc để ẩn nếu section đã đủ maxVisible). */
 export async function saveEntityItem(collection: ContentCollection, id: string | null, input: Doc, rule?: ItemRule): Promise<ActionResult> {
   const def = getDef(collection)
   const sources = await getOptionSources()
@@ -50,7 +58,7 @@ export async function saveEntityItem(collection: ContentCollection, id: string |
   const data = v.value
 
   const items = await col(def.collection)
-  const existing = id ? ((await items.findOne({ _id: id } as never)) as Doc | null) : null
+  const existing = id ? ((await items.findOne({ _id: id, ...NOT_DELETED } as never)) as Doc | null) : null
   if (id && !existing) return fail('Không tìm thấy mục này (có thể đã bị xóa).')
 
   const ruleError = rule?.(data, { existing, sources })
@@ -62,18 +70,26 @@ export async function saveEntityItem(collection: ContentCollection, id: string |
     return { ok: true, id: id! }
   }
 
+  // Kiểm tra trùng _id trên MỌI bản ghi (kể cả đã xóa mềm — chúng vẫn giữ _id trong DB)
   const base = slugify(String(data[def.titleField] ?? '')) || def.collection
   let newId = base
   for (let n = 2; await items.findOne({ _id: newId } as never); n++) newId = `${base}-${n}`
-  await items.insertOne({ _id: newId, ...data } as never)
+  await items.insertOne({ _id: newId, ...data, is_deleted: false } as never)
+  // Section đã đủ số mục hiển thị tối đa → mục mới để ẩn (admin tắt 1 mục khác rồi bật mục này)
+  if (def.maxVisible !== undefined && (await countVisible(def)) >= def.maxVisible) {
+    invalidate(def.collection)
+    return { ok: true, id: newId }
+  }
   await (await col(def.section)).updateOne({ _id: SECTION_ID } as never, { $push: { [def.sectionKey]: { $each: [newId], $position: 0 } } } as never)
   invalidate(def.collection, def.section)
   return { ok: true, id: newId }
 }
 
+/** Xóa mềm: đặt is_deleted = true (bản ghi vẫn còn trong DB) và gỡ khỏi danh sách hiển thị của section. */
 export async function deleteEntityItem(collection: ContentCollection, id: string): Promise<ActionResult> {
   const def = getDef(collection)
-  await (await col(def.collection)).deleteOne({ _id: id } as never)
+  const r = await (await col(def.collection)).updateOne({ _id: id, ...NOT_DELETED } as never, { $set: { is_deleted: true } } as never)
+  if (!r.matchedCount) return fail('Không tìm thấy mục này (có thể đã bị xóa).')
   await (await col(def.section)).updateOne({ _id: SECTION_ID } as never, { $pull: { [def.sectionKey]: id } } as never)
   invalidate(def.collection, def.section)
   return { ok: true }
@@ -83,7 +99,10 @@ export async function deleteEntityItem(collection: ContentCollection, id: string
 export async function setEntityVisibleOrder(collection: ContentCollection, ids: string[]): Promise<ActionResult> {
   const def = getDef(collection)
   const clean = [...new Set(ids.filter((x): x is string => typeof x === 'string'))]
-  const count = await (await col(def.collection)).countDocuments({ _id: { $in: clean } } as never)
+  if (def.maxVisible !== undefined && clean.length > def.maxVisible) {
+    return fail(`${def.label} chỉ hiển thị tối đa ${def.maxVisible} mục. Tắt Hiển thị 1 mục khác trước.`)
+  }
+  const count = await (await col(def.collection)).countDocuments({ _id: { $in: clean }, ...NOT_DELETED } as never)
   if (count !== clean.length) return fail('Danh sách có mục không tồn tại, tải lại trang rồi thử lại.')
   await (await col(def.section)).updateOne({ _id: SECTION_ID } as never, { $set: { [def.sectionKey]: clean } } as never)
   invalidate(def.section)
@@ -103,10 +122,10 @@ export async function saveEntitySection(collection: ContentCollection, input: Do
   return { ok: true }
 }
 
-/** Danh mục (bảng giá / nhóm mẫu) đang được item dùng thì không được xóa khỏi section. */
+/** Danh mục (bảng giá / nhóm mẫu) đang được item (chưa xóa mềm) dùng thì không được xóa khỏi section. */
 export async function checkCategoriesInUse(collection: 'price' | 'model', categories: { id: string }[]): Promise<ActionResult | void> {
   const ids = categories.map((c) => c.id)
-  const inUse = (await (await col(collection)).distinct('category' as never)) as unknown as (string | string[])[]
+  const inUse = (await (await col(collection)).distinct('category' as never, NOT_DELETED as never)) as unknown as (string | string[])[]
   const missing = [...new Set(inUse.flat())].filter((u) => !ids.includes(u))
   if (missing.length) {
     return fail(`Còn mục đang dùng danh mục: ${missing.join(', ')}. Chuyển các mục đó sang danh mục khác trước.`, { categories: 'Danh mục đang được dùng.' })
@@ -119,11 +138,18 @@ export type BookingCollection = 'booking_customer' | 'course_student'
 
 export async function setRecordStatus(collection: BookingCollection, id: string, status: string): Promise<ActionResult> {
   if (!(BOOKING_STATUSES as readonly string[]).includes(status)) return fail('Dữ liệu không hợp lệ.')
-  const r = await (await col(collection)).updateOne({ _id: id }, { $set: { status: status as BookingStatus } })
+  const r = await (await col(collection)).updateOne({ _id: id, ...NOT_DELETED } as never, { $set: { status: status as BookingStatus } })
   return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi.')
 }
 
+/** Xóa hẳn khỏi DB — chỉ dùng cho `booking_customer` (chưa có yêu cầu xóa mềm). */
 export async function deleteRecord(collection: BookingCollection, id: string): Promise<ActionResult> {
   await (await col(collection)).deleteOne({ _id: id })
   return { ok: true }
+}
+
+/** Xóa mềm học viên đăng ký: đặt is_deleted = true. */
+export async function softDeleteStudent(id: string): Promise<ActionResult> {
+  const r = await (await col('course_student')).updateOne({ _id: id, ...NOT_DELETED }, { $set: { is_deleted: true } })
+  return r.matchedCount ? { ok: true } : fail('Không tìm thấy bản ghi.')
 }

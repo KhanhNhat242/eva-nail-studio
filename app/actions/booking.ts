@@ -71,7 +71,7 @@ export async function submitBooking(_prev: BookingState, formData: FormData): Pr
     if (mode === 'beauty') {
       await (await col('booking_customer')).insertOne({ ...base, service: choice, service_label: choiceLabel ?? choice, date, time })
     } else {
-      await (await col('course_student')).insertOne({ ...base, course_name: choice, course_label: choiceLabel ?? choice, session: time || null })
+      await (await col('course_student')).insertOne({ ...base, course_name: choice, course_label: choiceLabel ?? choice, session: time || null, is_deleted: false })
     }
   } catch (e) {
     console.error('[booking] lưu thất bại', e)

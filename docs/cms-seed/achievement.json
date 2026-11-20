@@ -6,7 +6,8 @@
     "course_id": "co-ban-salon",
     "placeholder": true,
     "img": "/images/nails/mat-meo-do-ruou-van-bac.jpg",
-    "img_alt": "Ảnh minh họa mẫu nail mắt mèo đỏ rượu (chưa phải bài của học viên)"
+    "img_alt": "Ảnh minh họa mẫu nail mắt mèo đỏ rượu (chưa phải bài của học viên)",
+    "is_deleted": false
   },
   {
     "id": "hv-02",
@@ -15,7 +16,8 @@
     "course_id": "full-salon",
     "placeholder": true,
     "img": "/images/nails/no-noi-mint-hong.jpg",
-    "img_alt": "Ảnh minh họa mẫu nail nơ nổi mint hồng (chưa phải bài của học viên)"
+    "img_alt": "Ảnh minh họa mẫu nail nơ nổi mint hồng (chưa phải bài của học viên)",
+    "is_deleted": false
   },
   {
     "id": "hv-03",
@@ -24,7 +26,8 @@
     "course_id": "full-a-z",
     "placeholder": true,
     "img": "/images/nails/vo-so-sao-bien.jpg",
-    "img_alt": "Ảnh minh họa mẫu nail vỏ sò sao biển nổi 3D (chưa phải bài của học viên)"
+    "img_alt": "Ảnh minh họa mẫu nail vỏ sò sao biển nổi 3D (chưa phải bài của học viên)",
+    "is_deleted": false
   },
   {
     "id": "hv-04",
@@ -33,6 +36,7 @@
     "course_id": "goi-duong-sinh",
     "placeholder": true,
     "img": "/images/services/goi-dau.jpg",
-    "img_alt": "Ảnh minh họa gội đầu dưỡng sinh (chưa phải bài của học viên)"
+    "img_alt": "Ảnh minh họa gội đầu dưỡng sinh (chưa phải bài của học viên)",
+    "is_deleted": false
   }
 ]

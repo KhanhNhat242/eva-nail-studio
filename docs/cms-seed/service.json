@@ -13,7 +13,8 @@
     "cta": {
       "label": "Đặt lịch",
       "href": "#dat-lich"
-    }
+    },
+    "is_deleted": false
   },
   {
     "id": "khoa-hoc",
@@ -33,7 +34,8 @@
     "overlay": {
       "kicker": "Khóa học tại Eva",
       "heading": "Học nghề ngay tại salon đang vận hành"
-    }
+    },
+    "is_deleted": false
   },
   {
     "id": "goi",
@@ -49,7 +51,8 @@
     "cta": {
       "label": "Đặt lịch",
       "href": "#dat-lich"
-    }
+    },
+    "is_deleted": false
   },
   {
     "id": "mi",
@@ -62,6 +65,7 @@
     "cta": {
       "label": "Đặt lịch",
       "href": "#dat-lich"
-    }
+    },
+    "is_deleted": false
   }
 ]

@@ -1,7 +1,8 @@
 import 'server-only'
 import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { col } from '@/lib/db/mongo'
+import { NOT_DELETED, col } from '@/lib/db/mongo'
+import { listUploads } from '@/lib/media'
 import { SECTION_ID, type BookingCustomerDoc, type CourseStudentDoc } from '@/types/cms'
 import type { EntityDef, OptionSource } from './schema'
 
@@ -27,7 +28,7 @@ export async function getOptionSources(): Promise<Record<OptionSource, Option[]>
   const [priceList, modelSec, courses] = await Promise.all([
     getSectionDoc('price_list'),
     getSectionDoc('model_section'),
-    (await col('course')).find().toArray(),
+    (await col('course')).find(NOT_DELETED).toArray(),
   ])
   const pairs = (d: PlainDoc | null, key: 'name' | 'label') =>
     ((d?.categories as Record<string, string>[] | undefined) ?? []).map((c) => ({ value: c.id, label: c[key] }))
@@ -38,20 +39,26 @@ export async function getOptionSources(): Promise<Record<OptionSource, Option[]>
   }
 }
 
-/** Item của 1 collection: đang hiển thị (theo thứ tự section) trước, item ẩn sau. */
+/**
+ * Item của 1 collection: đang hiển thị (theo thứ tự section) trước, item ẩn sau.
+ * `deletedItems`: item đã xóa mềm (is_deleted: true) — chỉ để xem trong popup "Đã xóa".
+ */
 export async function getEntityData(def: EntityDef) {
-  const [section, docs, optionSources] = await Promise.all([
+  const [section, all, optionSources] = await Promise.all([
     getSectionDoc(def.section),
     (await col(def.collection)).find().toArray(),
     getOptionSources(),
   ])
+  const isDeleted = (d: { is_deleted?: boolean }) => d.is_deleted === true
+  const docs = all.filter((d) => !isDeleted(d))
+  const deletedItems = all.filter(isDeleted).map(plain)
   const visibleIds = ((section?.[def.sectionKey] as string[] | undefined) ?? []).filter((id) => docs.some((d) => d._id === id))
   const rank = (id: string) => (visibleIds.includes(id) ? visibleIds.indexOf(id) : Number.MAX_SAFE_INTEGER)
   const items = docs.map(plain).sort((a, b) => rank(a.id) - rank(b.id))
-  return { section, items, visibleIds, optionSources }
+  return { section, items, visibleIds, optionSources, deletedItems }
 }
 
-/** Ảnh có sẵn trong public/images (thư mục ASCII), bỏ "tư liệu" gốc của khách. */
+/** Thư viện ảnh cho ô chọn ảnh: ảnh tải lên từ CMS (mới nhất trước) + ảnh có sẵn trong public/images (thư mục ASCII, bỏ "tư liệu" gốc của khách và thư mục uploads — đã liệt kê qua /uploads/). */
 export async function listImages(): Promise<string[]> {
   const base = join(process.cwd(), 'public', 'images')
   const out: string[] = []
@@ -60,14 +67,14 @@ export async function listImages(): Promise<string[]> {
       if (e.name.startsWith('.')) continue
       const r = rel ? `${rel}/${e.name}` : e.name
       if (e.isDirectory()) {
-        if (/^[a-z0-9-]+$/.test(e.name)) await walk(join(dir, e.name), r)
+        if (/^[a-z0-9-]+$/.test(e.name) && r !== 'uploads') await walk(join(dir, e.name), r)
       } else if (/\.(jpe?g|png|webp|avif)$/i.test(e.name) && /^[A-Za-z0-9/_.-]+$/.test(r)) {
         out.push(`/images/${r}`)
       }
     }
   }
   await walk(base, '')
-  return out.sort()
+  return [...(await listUploads()), ...out.sort()]
 }
 
 type BookingRow<T> = Omit<T, '_id' | 'created_at'> & { id: string; created_at: string }
@@ -82,7 +89,13 @@ export async function getBookings(): Promise<BookingRow<BookingCustomerDoc>[]> {
 }
 
 export async function getStudents(): Promise<BookingRow<CourseStudentDoc>[]> {
-  const docs = await (await col('course_student')).find().sort({ created_at: -1 }).limit(1000).toArray()
+  const docs = await (await col('course_student')).find(NOT_DELETED).sort({ created_at: -1 }).limit(1000).toArray()
+  return docs.map(row)
+}
+
+/** Học viên đã xóa mềm — chỉ để xem trong popup "Đã xóa". */
+export async function getDeletedStudents(): Promise<BookingRow<CourseStudentDoc>[]> {
+  const docs = await (await col('course_student')).find({ is_deleted: true }).sort({ created_at: -1 }).limit(1000).toArray()
   return docs.map(row)
 }
 
@@ -99,9 +112,9 @@ export async function getDashboard() {
   ])
   const [newBookings, newStudents, unconfirmedPrices, placeholderWorks] = await Promise.all([
     bookings.countDocuments({ status: 'new' }),
-    students.countDocuments({ status: 'new' }),
-    models.countDocuments({ price_confirmed: false }),
-    achievements.countDocuments({ placeholder: true }),
+    students.countDocuments({ status: 'new', ...NOT_DELETED }),
+    models.countDocuments({ price_confirmed: false, ...NOT_DELETED }),
+    achievements.countDocuments({ placeholder: true, ...NOT_DELETED }),
   ])
   return { newBookings, newStudents, unconfirmedPrices, placeholderWorks, sessionConfirmed: courseSec?.session_confirmed === true }
 }

@@ -87,8 +87,14 @@ location / {
 
 ## 6. Ảnh
 
-CMS chọn ảnh có sẵn trong `public/images/` (thư mục tên ASCII). Có hai cách thêm ảnh mới:
-- commit vào repo rồi deploy lại;
-- chép thẳng vào `public/images/<thư mục>/` trên VPS.
+**Ảnh có sẵn**: CMS chọn ảnh trong `public/images/` (thư mục tên ASCII). Thêm ảnh bằng cách commit vào repo rồi deploy lại, hoặc chép thẳng vào `public/images/<thư mục>/` trên VPS. Ảnh chép thẳng chỉ hiện sau khi `pm2 restart eva`.
 
-Chưa có chức năng upload ảnh từ CMS.
+**Ảnh tải lên từ CMS** (trang Ảnh Hero → "Tải ảnh từ máy"):
+- File lưu ở `public/images/uploads/` trên VPS, phục vụ qua đường dẫn `/uploads/<tên file>` nên hiện ngay, không cần restart. Thư mục này nằm trong `.gitignore`.
+- **Không xóa thư mục này khi deploy.** Đừng chạy `git clean -fdx`, và đừng deploy bằng cách xóa rồi clone lại repo.
+- **Sao lưu** thư mục này cùng với database. Ví dụ thêm vào crontab ở mục 5:
+  ```bash
+  0 2 * * * tar czf /var/backups/eva-uploads-$(date +\%F).tgz -C /path/to/eva-nail-studio/public/images uploads
+  ```
+- nginx mặc định chỉ nhận body 1MB. Thêm `client_max_body_size 8m;` vào khối `server` hoặc `location /`, nếu không ảnh trên 1MB sẽ lỗi 413. Next đã đặt `serverActions.bodySizeLimit: "6mb"` cho ảnh tối đa 5MB.
+- Chạy nhiều instance trên nhiều máy thì không dùng cách lưu file này được, vì mỗi máy có thư mục riêng.

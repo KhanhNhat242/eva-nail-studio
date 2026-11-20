@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Ảnh tải lên từ CMS (lưu trên VPS, không commit — xem docs/DEPLOY.md)
+/public/images/uploads/

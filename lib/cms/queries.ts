@@ -1,6 +1,6 @@
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
-import { col } from '@/lib/db/mongo'
+import { NOT_DELETED, col } from '@/lib/db/mongo'
 import { formatPrice, formatVnd } from '@/lib/format'
 import { HERO_SLOTS, SECTION_ID, type CollectionName, type ServiceDoc } from '@/types/cms'
 import type {
@@ -29,9 +29,9 @@ async function section<K extends CollectionName>(name: K) {
   return doc
 }
 
-/** Lấy các item theo đúng thứ tự id trong section, bỏ id không còn tồn tại. */
+/** Lấy các item theo đúng thứ tự id trong section, bỏ id không còn tồn tại hoặc đã xóa mềm. */
 async function byIds<K extends CollectionName>(name: K, ids: string[]) {
-  const docs = await (await col(name)).find({ _id: { $in: ids } } as never).toArray()
+  const docs = await (await col(name)).find({ _id: { $in: ids }, ...NOT_DELETED } as never).toArray()
   const map = new Map(docs.map((d) => [String(d._id), d]))
   return ids.flatMap((id) => {
     const d = map.get(id)
@@ -203,7 +203,7 @@ export async function getBookingOptions(): Promise<BookingOptions> {
     getModelSection(),
     getPriceList(),
     section('course_section'),
-    (await col('course')).find().toArray(),
+    (await col('course')).find(NOT_DELETED).toArray(),
   ])
   const rank = (id: string) => {
     const i = courseSec.course.indexOf(id)

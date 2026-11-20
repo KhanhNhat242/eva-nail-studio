@@ -9,6 +9,12 @@ export type PriceRange = { min: number; max: number | null } | null
 
 export const SECTION_ID = 'main'
 
+/**
+ * Xóa mềm: bấm "Xóa" trong CMS chỉ đặt `is_deleted: true` (bản ghi vẫn còn trong DB), mặc định `false`.
+ * Áp dụng cho các collection danh sách nội dung + `course_student`. Mọi truy vấn đọc phải lọc bằng NOT_DELETED (lib/db/mongo.ts).
+ */
+export type SoftDelete = { is_deleted: boolean }
+
 /** Kết quả trả về của mọi Server Action trong /admin (dùng được cả ở client). */
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string; errors?: Record<string, string> }
 
@@ -17,7 +23,7 @@ export const HERO_SLOTS = ['hero1', 'hero2', 'hero3', 'hero4', 'hero5', 'hero6',
 export type HeroSlot = (typeof HERO_SLOTS)[number]
 export type HeroGridDoc = { _id: string } & Record<HeroSlot, HeroPhotoDoc>
 
-export type ServiceDoc = {
+export type ServiceDoc = SoftDelete & {
   _id: string
   title: string
   description: string
@@ -32,10 +38,10 @@ export type ServiceDoc = {
 }
 export type ServiceSectionDoc = { _id: string; title: string; description: string; service: string[] }
 
-export type ComboDoc = { _id: string; title: string; description: string; price: number; img: string; img_alt: string }
+export type ComboDoc = SoftDelete & { _id: string; title: string; description: string; price: number; img: string; img_alt: string }
 export type ComboSectionDoc = { _id: string; eyebrow: string; title: string; title_highlight: string; combo: string[] }
 
-export type PriceDoc = {
+export type PriceDoc = SoftDelete & {
   _id: string
   category: string
   category_name: string
@@ -46,7 +52,7 @@ export type PriceDoc = {
 }
 export type PriceListDoc = { _id: string; categories: { id: string; name: string }[]; price: string[] }
 
-export type ModelDoc = {
+export type ModelDoc = SoftDelete & {
   _id: string
   code: string
   name: string
@@ -61,7 +67,7 @@ export type ModelDoc = {
 }
 export type ModelSectionDoc = { _id: string; title: string; categories: { id: string; label: string }[]; model: string[] }
 
-export type CourseDoc = {
+export type CourseDoc = SoftDelete & {
   _id: string
   name: string
   price: number
@@ -83,7 +89,7 @@ export type CourseSectionDoc = {
   course: string[]
 }
 
-export type AchievementDoc = {
+export type AchievementDoc = SoftDelete & {
   _id: string
   name: string
   description: string
@@ -95,7 +101,7 @@ export type AchievementDoc = {
 }
 export type AchievementSectionDoc = { _id: string; eyebrow: string; title: string; description: string; achievement: string[] }
 
-export type WhyusDoc = { _id: string; title: string; description: string; img: string; tag: string; emphasis: boolean }
+export type WhyusDoc = SoftDelete & { _id: string; title: string; description: string; img: string; tag: string; emphasis: boolean }
 export type WhyusSectionDoc = { _id: string; eyebrow: string; whyus: string[] }
 
 export const BOOKING_STATUSES = ['new', 'confirmed', 'done', 'cancelled'] as const
@@ -122,7 +128,7 @@ export type BookingCustomerDoc = {
   created_at: Date
 }
 
-export type CourseStudentDoc = {
+export type CourseStudentDoc = SoftDelete & {
   _id: string
   name: string
   phone_number: string

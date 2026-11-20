@@ -1,13 +1,26 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { verifyAdmin } from '@/lib/auth/dal'
 import { getBookings } from '@/lib/cms/admin-queries'
 import { BookingTable } from '@/components/admin/BookingTable'
 import { PageHeader } from '@/components/admin/PageHeader'
+import { PanelFallback } from '@/components/admin/PanelFallback'
 import { deleteBooking, setStatus } from '@/app/admin/actions/dat-lich'
 
 export const metadata: Metadata = { title: 'Lịch đặt' }
 
-export default async function BookingsPage() {
+export default function BookingsPage() {
+  return (
+    <>
+      <PageHeader title="Lịch đặt" description="Khách gửi từ form “Đặt lịch làm đẹp”. Nhắn Zalo xác nhận rồi chuyển trạng thái “Đã xác nhận”." />
+      <Suspense fallback={<PanelFallback />}>
+        <BookingsTable />
+      </Suspense>
+    </>
+  )
+}
+
+async function BookingsTable() {
   await verifyAdmin()
   const rows = (await getBookings()).map((b) => ({
     id: b.id,
@@ -19,10 +32,5 @@ export default async function BookingsPage() {
     status: b.status,
     created_at: b.created_at,
   }))
-  return (
-    <>
-      <PageHeader title="Lịch đặt" description="Khách gửi từ form “Đặt lịch làm đẹp”. Nhắn Zalo xác nhận rồi chuyển trạng thái “Đã xác nhận”." />
-      <BookingTable actions={{ setStatus, remove: deleteBooking }} rows={rows} choiceTitle="Dịch vụ / mẫu" whenTitle="Ngày giờ hẹn" />
-    </>
-  )
+  return <BookingTable actions={{ setStatus, remove: deleteBooking }} rows={rows} choiceTitle="Dịch vụ / mẫu" whenTitle="Ngày giờ hẹn" />
 }

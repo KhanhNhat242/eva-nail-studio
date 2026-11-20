@@ -53,6 +53,11 @@ export type EntityDef = {
   itemLabel: string
   /** Trường dùng làm tên item (và để tạo id khi thêm mới) */
   titleField: string
+  /**
+   * Số mục tối đa được hiển thị cùng lúc trên trang chủ (bố cục section cố định số thẻ). Không đặt = không giới hạn.
+   * Đủ rồi thì muốn bật thêm phải tắt Hiển thị 1 mục khác; mục mới thêm khi đã đủ sẽ ở trạng thái ẩn.
+   */
+  maxVisible?: number
   fields: FieldDef[]
   sectionFields: FieldDef[]
   note?: string
@@ -67,6 +72,7 @@ export const entities: EntityDef[] = [
     section: 'service_section',
     sectionKey: 'service',
     slug: 'dich-vu',
+    maxVisible: 4,
     label: 'Dịch vụ',
     itemLabel: 'thẻ dịch vụ',
     titleField: 'title',
@@ -90,6 +96,7 @@ export const entities: EntityDef[] = [
     section: 'combo_section',
     sectionKey: 'combo',
     slug: 'combo',
+    maxVisible: 4,
     label: 'Hot combo',
     itemLabel: 'combo',
     titleField: 'title',
@@ -154,6 +161,7 @@ export const entities: EntityDef[] = [
     section: 'course_section',
     sectionKey: 'course',
     slug: 'khoa-hoc',
+    maxVisible: 3,
     label: 'Khóa học',
     itemLabel: 'khóa học',
     titleField: 'name',
@@ -182,6 +190,7 @@ export const entities: EntityDef[] = [
     section: 'achievement_section',
     sectionKey: 'achievement',
     slug: 'thanh-qua',
+    maxVisible: 4,
     label: 'Thành quả học viên',
     itemLabel: 'thành quả',
     titleField: 'name',
@@ -201,6 +210,7 @@ export const entities: EntityDef[] = [
     section: 'whyus_section',
     sectionKey: 'whyus',
     slug: 'vi-sao',
+    maxVisible: 7,
     label: 'Vì sao chọn Eva',
     itemLabel: 'lý do',
     titleField: 'title',
@@ -237,7 +247,8 @@ function setPath(obj: Record<string, unknown>, path: string, value: unknown) {
 
 // ---------- Validate (chạy ở server; client chỉ dùng để gợi ý) ----------
 
-export const IMAGE_PATH_RE = /^\/images\/[A-Za-z0-9/_.-]+\.(jpe?g|png|webp|avif)$/i
+/** Ảnh có sẵn trong public/images, hoặc ảnh tải lên từ CMS (/uploads/<tên>, xem lib/media.ts). */
+export const IMAGE_PATH_RE = /^\/(images|uploads)\/[A-Za-z0-9/_.-]+\.(jpe?g|png|webp|avif)$/i
 
 export type ValidationResult = { ok: true; value: Record<string, unknown> } | { ok: false; errors: Record<string, string> }
 
@@ -263,7 +274,7 @@ export function validateFields(fields: FieldDef[], input: Record<string, unknown
           break
         }
         if (f.max && s.length > f.max) fail(`Tối đa ${f.max} ký tự.`)
-        if ((f.type === 'image' || f.type === 'imageNullable') && (!IMAGE_PATH_RE.test(s) || s.includes('..'))) fail('Ảnh phải là đường dẫn trong /images/…')
+        if ((f.type === 'image' || f.type === 'imageNullable') && (!IMAGE_PATH_RE.test(s) || s.includes('..'))) fail('Chọn ảnh trong thư viện (/images/… hoặc ảnh đã tải lên).')
         setPath(out, f.name, s)
         break
       }

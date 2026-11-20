@@ -63,6 +63,47 @@
   .press:active {
     scale: 0.98;
   }
+
+  /* CMS: nút kéo đổi thứ tự trong bảng (components/admin/useRowReorder.ts) */
+  .drag-handle {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-control);
+    color: var(--color-ink-soft);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition:
+      background-color 200ms var(--ease-soft),
+      color 200ms var(--ease-soft);
+  }
+
+  .drag-handle:hover:not(:disabled) {
+    background-color: var(--color-cream-deep);
+    color: var(--color-ink);
+  }
+
+  .drag-handle:active:not(:disabled) {
+    cursor: grabbing;
+  }
+
+  .drag-handle:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  /* Dòng đang được kéo: nổi lên trên các dòng khác */
+  .ant-table-row[data-dragging] {
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 12px 28px -12px rgb(20 20 20 / 0.28);
+  }
+
+  .ant-table-row[data-dragging] > td {
+    background: var(--color-cream) !important;
+  }
 }
 
 /* Ô vừa được điền sẵn bởi "Đặt mẫu này" — nháy viền vàng đồng 1 lần */
@@ -142,8 +183,12 @@ html {
   }
 }
 
-/* Chặn tràn ngang – dùng clip thay vì hidden để không làm hỏng position: sticky */
-html,
+/*
+ * Chặn tràn ngang – dùng clip thay vì hidden để không làm hỏng position: sticky.
+ * CHỈ đặt trên body, KHÔNG đặt trên html: khi html để overflow mặc định, overflow của body được chuyển lên viewport.
+ * Nếu html cũng có overflow, lúc Modal/Drawer của antd khóa cuộn (body overflow-y: hidden), body biến thành
+ * khung cuộn riêng → phần tử sticky (thanh bên CMS, header) bám theo body và trôi mất khi trang đang cuộn.
+ */
 body {
   overflow-x: clip;
 }

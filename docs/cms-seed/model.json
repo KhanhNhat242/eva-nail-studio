@@ -11,7 +11,8 @@
     "img": "/images/nails/mat-meo-do-ruou-van-bac.jpg",
     "img_alt": "Bộ móng mắt mèo đỏ rượu phối vân chrome bạc bóng",
     "img_width": 1080,
-    "img_height": 1440
+    "img_height": 1440,
+    "is_deleted": false
   },
   {
     "id": "hoa-noi-3d-hong-thach",
@@ -26,7 +27,8 @@
     "img": "/images/nails/hoa-noi-3d-hong-thach.jpg",
     "img_alt": "Móng dài sơn thạch hồng nude đính hoa nổi 3D và đá",
     "img_width": 1080,
-    "img_height": 1440
+    "img_height": 1440,
+    "is_deleted": false
   },
   {
     "id": "vo-so-sao-bien",
@@ -41,7 +43,8 @@
     "img": "/images/nails/vo-so-sao-bien.jpg",
     "img_alt": "Móng chủ đề biển với sao biển, vỏ sò nổi 3D và hoa dâm bụt",
     "img_width": 1284,
-    "img_height": 1249
+    "img_height": 1249,
+    "is_deleted": false
   },
   {
     "id": "lua-hong-den",
@@ -56,7 +59,8 @@
     "img": "/images/nails/lua-hong-den-da-bao.jpg",
     "img_alt": "Móng nhọn hoạ tiết lửa hồng đen phối da báo và viền đá",
     "img_width": 1284,
-    "img_height": 1284
+    "img_height": 1284,
+    "is_deleted": false
   },
   {
     "id": "dinh-da-da-bao",
@@ -70,7 +74,8 @@
     "img": "/images/nails/dinh-da-da-bao.jpg",
     "img_alt": "Móng ngắn xanh denim đính đá lớn phối hoạ tiết da báo",
     "img_width": 1080,
-    "img_height": 1080
+    "img_height": 1080,
+    "is_deleted": false
   },
   {
     "id": "mat-meo-lavender",
@@ -85,7 +90,8 @@
     "img": "/images/nails/mat-meo-lavender-dinh-da.jpg",
     "img_alt": "Móng nhọn mắt mèo tím lavender sữa, đính đá viền chân móng",
     "img_width": 1959,
-    "img_height": 1959
+    "img_height": 1959,
+    "is_deleted": false
   },
   {
     "id": "ombre-ngoc-trai-tim",
@@ -100,7 +106,8 @@
     "img": "/images/nails/ombre-ngoc-trai-tim.jpg",
     "img_alt": "Móng ombre nude ánh ngọc trai, trái tim viền đá và nơ nhỏ",
     "img_width": 1080,
-    "img_height": 1440
+    "img_height": 1440,
+    "is_deleted": false
   },
   {
     "id": "no-noi-mint-hong",
@@ -115,6 +122,7 @@
     "img": "/images/nails/no-noi-mint-hong.jpg",
     "img_alt": "Móng vuông hồng nhũ loang mint, nơ nổi trong suốt và ngọc trai",
     "img_width": 1080,
-    "img_height": 1440
+    "img_height": 1440,
+    "is_deleted": false
   }
 ]

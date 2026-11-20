@@ -13,7 +13,8 @@
     "gift": null,
     "featured": false,
     "img": "/images/nails/trang-guong-chrome.jpg",
-    "img_placeholder": true
+    "img_placeholder": true,
+    "is_deleted": false
   },
   {
     "id": "full-salon",
@@ -29,7 +30,8 @@
     "gift": null,
     "featured": false,
     "img": "/images/nails/ombre-xanh-bien.jpg",
-    "img_placeholder": true
+    "img_placeholder": true,
+    "is_deleted": false
   },
   {
     "id": "full-a-z",
@@ -45,7 +47,8 @@
     "gift": "Tặng bộ đầu mài WILSON cao cấp",
     "featured": true,
     "img": "/images/nails/hero-hoa-noi-hong.jpg",
-    "img_placeholder": true
+    "img_placeholder": true,
+    "is_deleted": false
   },
   {
     "id": "goi-duong-sinh",
@@ -61,6 +64,7 @@
     "gift": null,
     "featured": false,
     "img": null,
-    "img_placeholder": true
+    "img_placeholder": true,
+    "is_deleted": false
   }
 ]

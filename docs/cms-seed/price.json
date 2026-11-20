@@ -9,7 +9,8 @@
       "max": 30000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "cung-mong",
@@ -21,7 +22,8 @@
       "max": 70000
     },
     "unit": null,
-    "note": "Làm đầy móng, fix móng yếu, dễ gãy"
+    "note": "Làm đầy móng, fix móng yếu, dễ gãy",
+    "is_deleted": false
   },
   {
     "id": "pha-son-gel",
@@ -33,7 +35,8 @@
       "max": 30000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "pha-mong-up",
@@ -45,7 +48,8 @@
       "max": 50000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "phu-gel-nuoi",
@@ -57,7 +61,8 @@
       "max": 100000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "dap-gel-noi",
@@ -69,7 +74,8 @@
       "max": 300000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "refill-dap-gel",
@@ -81,7 +87,8 @@
       "max": 200000
     },
     "unit": null,
-    "note": "Làm đầy chân móng gel mới lại"
+    "note": "Làm đầy chân móng gel mới lại",
+    "is_deleted": false
   },
   {
     "id": "up-mong-gel",
@@ -93,7 +100,8 @@
       "max": 130000
     },
     "unit": null,
-    "note": "Úp móng bằng base gel cách chân"
+    "note": "Úp móng bằng base gel cách chân",
+    "is_deleted": false
   },
   {
     "id": "refill-up",
@@ -105,7 +113,8 @@
       "max": 100000
     },
     "unit": null,
-    "note": "Làm đầy chân móng úp mới lại"
+    "note": "Làm đầy chân móng úp mới lại",
+    "is_deleted": false
   },
   {
     "id": "biab",
@@ -117,7 +126,8 @@
       "max": 220000
     },
     "unit": null,
-    "note": "Phủ gel builder nuôi móng, có màu sẵn"
+    "note": "Phủ gel builder nuôi móng, có màu sẵn",
+    "is_deleted": false
   },
   {
     "id": "son-gel",
@@ -129,7 +139,8 @@
       "max": 110000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "son-mat-meo",
@@ -141,7 +152,8 @@
       "max": 130000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "ombre",
@@ -153,7 +165,8 @@
       "max": 120000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "son-3-mau",
@@ -165,7 +178,8 @@
       "max": 30000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "french",
@@ -177,7 +191,8 @@
       "max": 120000
     },
     "unit": "set",
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "trang-guong",
@@ -189,7 +204,8 @@
       "max": 120000
     },
     "unit": "set",
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "ve-gel-noi",
@@ -201,7 +217,8 @@
       "max": 50000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "ve-co-ban",
@@ -213,7 +230,8 @@
       "max": 35000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "ve-hoat-hinh",
@@ -225,7 +243,8 @@
       "max": 200000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "an-nhu",
@@ -237,7 +256,8 @@
       "max": 30000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "marble",
@@ -249,7 +269,8 @@
       "max": 45000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "hoa-tiet-gam",
@@ -261,7 +282,8 @@
       "max": 25000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "charm",
@@ -273,7 +295,8 @@
       "max": 50000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "thu-noi",
@@ -285,7 +308,8 @@
       "max": 80000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "sticker",
@@ -297,7 +321,8 @@
       "max": 30000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "phu-mat-meo",
@@ -309,7 +334,8 @@
       "max": 90000
     },
     "unit": null,
-    "note": "Thêm 1 lớp mắt mèo trên nền"
+    "note": "Thêm 1 lớp mắt mèo trên nền",
+    "is_deleted": false
   },
   {
     "id": "goi-30",
@@ -321,7 +347,8 @@
       "max": 69000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "goi-45",
@@ -333,7 +360,8 @@
       "max": 99000
     },
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "noi-mi",
@@ -342,7 +370,8 @@
     "name": "Nối mi",
     "price": null,
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "uon-mi",
@@ -351,6 +380,7 @@
     "name": "Uốn mi",
     "price": null,
     "unit": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   }
 ]

@@ -29,3 +29,6 @@ export function getDb(): Promise<Db> {
 export async function col<K extends CollectionName>(name: K): Promise<Collection<CollectionMap[K]>> {
   return (await getDb()).collection<CollectionMap[K]>(name)
 }
+
+/** Bộ lọc bỏ bản ghi đã xóa mềm. Dùng `$ne: true` để bản ghi cũ chưa có trường is_deleted vẫn được tính là chưa xóa. */
+export const NOT_DELETED = { is_deleted: { $ne: true } } as const

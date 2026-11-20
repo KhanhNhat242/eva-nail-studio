@@ -5,7 +5,8 @@
     "phone_number": "0900000011",
     "course_name": "full-a-z",
     "session": "09:30 – 13:00",
-    "note": "Dữ liệu mẫu để test CMS"
+    "note": "Dữ liệu mẫu để test CMS",
+    "is_deleted": false
   },
   {
     "id": "cs-0002",
@@ -13,7 +14,8 @@
     "phone_number": "0900000012",
     "course_name": "goi-duong-sinh",
     "session": null,
-    "note": null
+    "note": null,
+    "is_deleted": false
   },
   {
     "id": "cs-0003",
@@ -21,6 +23,7 @@
     "phone_number": "0900000013",
     "course_name": "tu-van",
     "session": "17:30 – 20:30",
-    "note": "Chưa chọn khóa, cần tư vấn"
+    "note": "Chưa chọn khóa, cần tư vấn",
+    "is_deleted": false
   }
 ]

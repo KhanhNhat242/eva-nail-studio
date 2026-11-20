@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { verifyAdmin } from '@/lib/auth/dal'
 import { getDashboard } from '@/lib/cms/admin-queries'
 import { PageHeader } from '@/components/admin/PageHeader'
+import { PanelFallback } from '@/components/admin/PanelFallback'
 
 function Stat({ href, value, label, hint }: { href: string; value: number | string; label: string; hint?: string }) {
   return (
@@ -13,7 +15,15 @@ function Stat({ href, value, label, hint }: { href: string; value: number | stri
   )
 }
 
-export default async function AdminHome() {
+export default function AdminHome() {
+  return (
+    <Suspense fallback={<PanelFallback />}>
+      <Dashboard />
+    </Suspense>
+  )
+}
+
+async function Dashboard() {
   const { username } = await verifyAdmin()
   const d = await getDashboard()
   return (

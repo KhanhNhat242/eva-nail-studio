@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
     agentUpgrade: "security",
+    // Ảnh tải lên từ CMS tối đa 5MB (lib/media.ts) + phần đệm multipart
+    serverActions: { bodySizeLimit: "6mb" },
   },
   cacheComponents: true,
   partialPrefetching: true,

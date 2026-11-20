@@ -345,12 +345,20 @@ Lưu ý:
 
 ## 15. CMS quản trị (`/admin`)
 
-Người dùng yêu cầu 19/11/2026. Chốt: MongoDB, deploy VPS, CMS nằm chung app Next.js, một tài khoản admin (biến môi trường), ảnh chọn từ `public/images` (chưa upload).
+Người dùng yêu cầu 19/11/2026. Chốt: MongoDB, deploy VPS, CMS nằm chung app Next.js, một tài khoản admin (biến môi trường), ảnh chọn từ `public/images`. Từ 20/11/2026 tải được ảnh lên từ máy, xem mục "Ảnh tải lên" bên dưới.
 
 - **Đăng nhập**: một tài khoản; mật khẩu lưu dạng băm scrypt trong `ADMIN_PASSWORD_HASH`; cookie phiên ký HMAC, hạn 7 ngày. Trang `/admin` có `noindex`.
 - **Nội dung sửa được**: lưới ảnh Hero, Dịch vụ, Hot combo, Bảng giá, Mẫu nail "Vừa ra lò", Khóa học, Thành quả học viên, Vì sao chọn Eva — tiêu đề/nhãn của section + thêm/sửa/xóa/đổi thứ tự item. Sửa xong trang chủ cập nhật ngay.
+- **Giới hạn số mục hiển thị** (người dùng yêu cầu 20/11/2026): Dịch vụ 4 · Hot combo 4 · Thành quả học viên 4 · Khóa học 3 · Vì sao chọn Eva 7, theo số thẻ cố định của bố cục từng section. Khi đã đủ, nút Hiển thị của các mục đang ẩn bị khóa: muốn hiện mục khác thì phải tắt 1 mục đang hiện trước. Mục mới thêm khi đã đủ sẽ được lưu ở trạng thái ẩn. Server cũng chặn. Cấu hình ở `maxVisible` trong `lib/cms/schema.ts`.
+- **Ảnh tải lên** (người dùng yêu cầu 20/11/2026, trang `/admin/hero`):
+  - Mỗi ô Hero có nút "Tải ảnh từ máy": tải lên rồi gán ngay vào ô đó. Khu "Ảnh đã tải lên" liệt kê ảnh và có nút xóa file.
+  - Chỉ nhận JPG/PNG/WebP/AVIF tối đa 5MB, kiểm tra bằng nội dung file chứ không chỉ đuôi. Tên file đổi sang ASCII kebab-case kèm mã thời gian.
+  - File lưu ở `public/images/uploads/` (người dùng chọn), phục vụ qua route `/uploads/<tên file>`. Lý do: `next start` chỉ quét `public/` lúc khởi động, file thêm sau sẽ 404 cho tới khi restart.
+  - Ảnh đã tải lên chọn được ở mọi ô chọn ảnh của CMS.
+  - Chỉ xóa được ảnh tải lên từ CMS, không xóa ảnh có sẵn trong `public/images`. Ảnh đang được dùng (Hero hoặc item chưa xóa mềm) thì không cho xóa.
 - **Không qua CMS**: thông tin tiệm (`data/business.ts`: tên, SĐT, giờ, địa chỉ) — vẫn khai báo một lần trong code.
 - **Khách đặt lịch / học viên đăng ký**: danh sách, lọc theo trạng thái, đổi trạng thái (mới · đã xác nhận · hoàn tất · đã huỷ), xóa.
+- **Xóa mềm** (người dùng yêu cầu 20/11/2026): item nội dung (`service`, `combo`, `price`, `model`, `course`, `achievement`, `whyus`) và học viên đăng ký (`course_student`) có trường `is_deleted` (boolean, mặc định `false`). Nút "Xóa" chỉ đặt `is_deleted: true`. Mọi truy vấn đọc (website, CMS, form) bỏ qua bản ghi đã xóa. Lịch đặt (`booking_customer`) vẫn xóa hẳn. Nút **"Đã xóa (n)"** ở 7 trang nội dung và trang Đăng ký học mở popup để xem các mục có `is_deleted: true` (chỉ xem; chưa có khôi phục).
 - **Cờ chờ xác nhận phải giữ và hiển thị trong CMS**: `price_confirmed` (giá mẫu nail), `placeholder` (ảnh thành quả học viên — website luôn ghi "Ảnh minh họa" khi bật), `session_confirmed` (ca học). Quy tắc mục 1–7 vẫn áp dụng cho nội dung nhập qua CMS (không bột/acrylic, không bịa số liệu).
 - **Dữ liệu khởi tạo**: `docs/cms-seed/*.json` → `npm run db:seed`. Triển khai: `docs/DEPLOY.md`.
 - **Route**:
@@ -400,3 +408,4 @@ Người dùng yêu cầu 19/11/2026. Chốt: MongoDB, deploy VPS, CMS nằm chu
 - **17/11/2026 – "Vì sao chọn Eva" bớt khoảng trống** (người dùng yêu cầu): chữ bên trái gom thành một khối căn giữa theo chiều dọc; khung ảnh desktop theo tỉ lệ 16:10 (tối đa 560px) thay vì cao cả màn hình; ở các mục cuối, ảnh đầu danh sách quay vòng vào hàng chờ để bên phải không trống.
 - **19/11/2026 – Dữ liệu mẫu cho backend CMS** (người dùng yêu cầu, chuẩn bị dựng CMS): `docs/cms-seed/*.json` — 17 collection (hero_grid, service/_section, combo/_section, price/price_list, model/_section, course/_section, achievement/_section, whyus/_section, booking_customer, course_student), sinh từ `data/*.ts` + nội dung section hiện tại; giữ nguyên các cờ chờ xác nhận. Quy ước trong `docs/cms-seed/README.md`. Website chưa đọc từ các file này.
 - **19/11/2026 – CMS + MongoDB** (mục 15): website đọc nội dung từ MongoDB (cache theo tag, CMS lưu → làm mới ngay); form đặt lịch / đăng ký học lưu vào MongoDB; trang quản trị `/admin`. Thêm dependency `mongodb` (người dùng đồng ý khi duyệt kế hoạch). Các file `data/*.ts` trừ `business.ts` được thay bằng DB.
+- **20/11/2026 – CMS: kéo-thả đổi thứ tự** (người dùng yêu cầu, từ trang Bảng giá): cột "Thứ tự" bỏ 2 nút ↑/↓, thay bằng nút kéo ≡ — nhấn giữ rồi kéo lên/xuống, các dòng khác trượt nhường chỗ (200ms, tôn trọng reduced motion); phím mũi tên lên/xuống trên nút kéo cũng đổi được thứ tự. Tự viết (`components/admin/useRowReorder.ts`, không thêm dependency); áp dụng cho mọi bảng nội dung dùng chung `EntityManager`.
